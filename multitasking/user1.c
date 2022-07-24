@@ -32,7 +32,7 @@ int main(void) {
       while (1)
    {
     //for(int i=0;i<100000000;i++);
-    syscall(2,'>');
+    syscall(2,'a');
     char c = syscall(3,0);
     syscall(2,c);
     //syscall(23,0);
