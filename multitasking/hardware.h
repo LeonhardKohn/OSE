@@ -1,4 +1,4 @@
-struct uart
+  struct uart
 {
   union
   {
@@ -21,10 +21,15 @@ struct uart
   uint8_t LSR; // R   = line status register (offset 5)
 };
 
+typedef enum state{
+  RUNNING = 1, READY, BLOCKED
+} state; // 0 bedeutet keiner ist da
+
 typedef struct PCB
 {
   uint64 sp;
   uint64 pc;
+  state state;
 } PCBs;
 
 typedef struct stackframe

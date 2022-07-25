@@ -3,13 +3,14 @@
 #include "types.h"
 #include "riscv.h"
 #include "hardware.h"
+#include "uart.h"
 
 extern int main(void);
 extern void ex(void);
 extern void printstring(char *);
 extern void printhex(uint64);
 extern PCBs pcb[];
-volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
+extern volatile struct uart *uart0;
 //volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
 int interval = 10000000; // 1/10 sekunde
 
@@ -18,24 +19,7 @@ int interval = 10000000; // 1/10 sekunde
 //------------------uartInit------------------//
 // vieles in hardware.h definiert 
 // uartInit wir in uart.c definiert
-void uartInit(){
 
-  // disable interrupts.
-  uart0->IER = 0x00;
-
-  // special mode to set baud rate.
-  uart0->LCR = 0x80;
-
-  // leave set-baud mode,
-  // and set word length to 8 bits, no parity.
-  uart0->LCR = 0x03;
-
-  // reset and enable FIFOs.
-  uart0->FCR = 0x07;
-
-  // enable receive interrupts.
-  uart0->IER = 0x01;
-}
 
 //------------------plicInit------------------//
 // vieles in riscv.h definiert 
