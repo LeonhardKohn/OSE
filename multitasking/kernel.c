@@ -2,6 +2,7 @@
 #include "riscv.h"
 #include "hardware.h"
 #include "lock.h"
+#include "ringbuffer.h"
 
 extern int main(void);
 extern void ex(void);
@@ -29,8 +30,8 @@ PCBs pcb[2];
 
 //----------------------------------------------------------------------//
 // TODO Fragen was hier gemacht werden soll
-void interrupt_toggle()
-{
+void interrupt_toggle(){
+
 }
 
 //-----------IO Funktionen--------------//
@@ -124,44 +125,68 @@ uint64 sys_exit(stackframes *s,uint64 pc){
 
 //------------------------interrupt handler-------------------------//
 uint64 handle_interrupts(stackframes *s,uint64 pc){
-    switch ((r_mcause() & 255)) {
-      case 7: //-----------------Timer Interrupt---------------//
-        putachar('I');
-        pc = pc - 4;
-        pc = yield(s,pc);
+switch ((r_mcause() & 255))
+    {
+    case 7: //-----------------Timer Interrupt---------------//
+      putachar('I');
+      pc = pc - 4;
+      pcb[current_process].pc = pc;            // save pc, stack pointer
+      pcb[current_process].sp = (uint64)s;
+      current_process++;                       // select new process
+      if (current_process > 1)
+        current_process = 0;
+      pc = pcb[current_process].pc;           // add +4 later!
+      s = (stackframes *)pcb[current_process].sp;
+      if (current_process == 0){              // Switch memory protection to new process
+        w_pmpcfg0(0x00000f0000);
+      } 
+      if (current_process == 1){              // only access to Process 1// 2 - full access; 1,0 - no access
+        w_pmpcfg0(0x000f000000);
+      }                                       // only access to Process 1 // 3 - full; 2,1,0 - no access
 
-        *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
-        return pc;
+      *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
+      break;
 
-        break;
-
-      case 11:
-        //-------------------------Hardware Interrupt-----------------//
-        ;                                      // leere Instruktion
-        uint32 irq = *(uint32 *)PLIC_CLAIM;    // get highest prio interrupt nr
-        switch (irq)
-        {
-        case UART_IRQ:                         // #define UART_IRQ 10
-            ;                                  // leere Instruktion
-          uint32 uart_irq = uart0->IIR;        // read UART interrupt source
-          putachar(readachar());
-          break;                               // (clears UART interrupt)
-
-        default:
-          printstring("Unknown Hareware interrupt!");
-          printhex(r_mcause());
-          printhex(*(uint32 *)PLIC_CLAIM);
-          break;
+    case 11:
+      //-------------------------Hardware Interrupt-----------------//
+      ;                                      // leere Instruktion
+      uint32 irq = *(uint32 *)PLIC_CLAIM;    // get highest prio interrupt nr
+      switch (irq)
+      {
+      case UART_IRQ:                         // #define UART_IRQ 10
+          ;                                  // leere Instruktion
+        uint32 uart_irq = uart0->IIR;        // read UART interrupt source
+        #if 0
+        while (!buffer_is_full()&&((uart0->LSR & (1 << 0)) != 0)){
+          rb_write(uart0->RBR);
         }
-        pc = pc - 4;
-        *(uint32 *)PLIC_COMPLETE = UART_IRQ;   // announce to PLIC that IRQ was handled
-        return pc;
-        break;
+        
+        
+        while (!buffer_is_empty()) { //RXRD
+          //c = uart0->RDR;
+
+          rb_read(c);
+        }
+        printstring(c);
+        #endif
+
+        putachar(uart0->RBR);
+        break;                               // (clears UART interrupt)
 
       default:
-        printstring("Unknown interrupt!");
+        printstring("Unknown Hareware interrupt!");
         printhex(r_mcause());
+        printhex(*(uint32 *)PLIC_CLAIM);
         break;
+      }
+      pc = pc - 4;
+      *(uint32 *)PLIC_COMPLETE = UART_IRQ;   // announce to PLIC that IRQ was handled
+      break;
+
+    default:
+      printstring("Unknown interrupt!");
+      printhex(r_mcause());
+      break;
       
     }
   return pc;
@@ -177,7 +202,7 @@ void panic(char *errorCode)
   {
   }
 }
-
+#if 0
 //---------------------lock funktionen--------------//
 // TODO uart_open()
 void uart_open(uart_lock *lock)
@@ -213,7 +238,7 @@ void uart_close(uart_lock *lock)
     lock->name = current_process;
   }
 }
-
+#endif
 //--------------------------------------exception handler------------------------------//
 
 // This is the C code part of the exception handler
@@ -221,6 +246,7 @@ void uart_close(uart_lock *lock)
 void exception(stackframes *s)
 {
   uint64 nr;
+  char *c = "";
   uint64 param;
   uint64 retval = 0;
   uint64 sp;
@@ -230,7 +256,7 @@ void exception(stackframes *s)
   pc = r_mepc();                               // read exception PC
 
   if ((r_mcause() & (1ULL << 63)) != 0){       // lieg ein asyncroner Interrupt vor?
-  #if 0
+  //#if 0
     switch ((r_mcause() & 255))
     {
     
@@ -252,6 +278,10 @@ void exception(stackframes *s)
       }                                       // only access to Process 1 // 3 - full; 2,1,0 - no access
 
       *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
+      //pc = yield(s,pc);
+      
+
+      *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
       break;
 
     case 11:
@@ -263,7 +293,21 @@ void exception(stackframes *s)
       case UART_IRQ:                         // #define UART_IRQ 10
           ;                                  // leere Instruktion
         uint32 uart_irq = uart0->IIR;        // read UART interrupt source
-        putachar(readachar());
+        #if 0
+        while (!buffer_is_full()&&((uart0->LSR & (1 << 0)) != 0)){
+          rb_write(uart0->RBR);
+        }
+        
+        
+        while (!buffer_is_empty()) { //RXRD
+          //c = uart0->RDR;
+
+          rb_read(c);
+        }
+        printstring(c);
+        #endif
+
+        putachar(uart0->RBR);
         break;                               // (clears UART interrupt)
 
       default:
@@ -282,10 +326,10 @@ void exception(stackframes *s)
       break;
       
     }
-    #endif
-    pc = handle_interrupts(s,pc);
+    //#endif
+    //pc = handle_interrupts(s,pc);
      //TODO hier returnen! Prof Fragen !
-     //w_mepc(pc + 4);
+     w_mepc(pc + 4);
      asm volatile("mv a1, %0"
                :
                : "r"(s));

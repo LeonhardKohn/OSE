@@ -5,8 +5,8 @@ CFLAGS=-g -mcmodel=medany -mno-relax -I.
 OBJCOPY=riscv64-unknown-elf-objcopy
 
 KERNELDEPS = hardware.h riscv.h types.h 
-KERNELOBJS = boot.o kernel.o ex.o setup.o
-USERDEPS = riscv.h types.h
+KERNELOBJS = boot.o kernel.o ex.o setup.o ringbuffer.o
+USERDEPS = riscv.h types.h 
 USEROBJS = user1.o user2.o userentry.o
 
 %.o: %.c $(KERNELDEPS) $(USERDEPS)

@@ -11,7 +11,7 @@ extern void printhex(uint64);
 extern PCBs pcb[];
 volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
 //volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
-int interval = 1000000; // 1/10 sekunde
+int interval = 10000000; // 1/10 sekunde
 
 
 
