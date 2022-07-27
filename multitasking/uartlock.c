@@ -6,29 +6,31 @@
 
 extern int current_process;
 extern void panic(char *c);
-
-void initlock(char *name){
+uartlock lock;
+#if 0
+void initlock(char *name, uartlock *lock_uart){
   char *name = name;
   int locked = 0;
   int process = 0; 
 }
 
+
 // Acquire the lock.
 // Loops (spins) until the lock is acquired.
-void acquire(spinlock *lk){
+void acquire(uartlock *lk){
     //asm("cli");
   
 }
 
 // Release the lock.
-void release(spinlock *lk){
+void release(uartlock *lk){
   //asm ("sti");
 
 }
 
 // Check whether this process is holding the lock.
 // Interrupts must be off.
-int holding(spinlock *lk){
+int holding(uartlock *lk){
   if (lk->locked==1)
   {
     return 1;
@@ -37,19 +39,19 @@ int holding(spinlock *lk){
   } 
 }
 
-void uart_open(spinlock *lk)
+void uart_open(uartlock *lk)
 {
   if (holding(lk))
   {
-    panic("uart is locked from Process " + *(char *)lk->name);
+    panic("uart is locked from Process " + lk->process);
   }
   else
   {
     lk->locked = 1;
-    lk->name = "uart";
     lk->process = current_process;
   }
 }
+#endif
 /**
  * A process that wants to read characters from the UART
  * now has to open it before and close it afterwards.
@@ -57,9 +59,9 @@ void uart_open(spinlock *lk)
  * time, so trying to call open_uart when another process
  * is using the UART will result in an error
  */
-
+#if 0
 // TODO uart_close()
-void uart_close(spinlock *lk)
+void uart_close(uartlock *lk)
 {
   if (lk->locked == 0)
   {
@@ -73,7 +75,22 @@ void uart_close(spinlock *lk)
   }
 }
 
+#endif
 
+
+int close_uart(void){
+   if (lock.locked == 0){
+      lock.locked= 1;
+      lock.process = current_process;
+      return 1; //uart ist jetzt zu 
+   }else{
+      return 2; // uart war schon vorher zu (Fehlerbehandlung)
+   }
+}
+
+void open_uart(void){
+   lock.locked = 0;
+}
 
 
 // push_off/pop_off are like intr_off()/intr_on() except that they are matched:

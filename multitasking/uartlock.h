@@ -1,14 +1,13 @@
 // Gegenseitiges Ausschlussverfahren.
-typedef struct spinlock {
+typedef struct uartlock {
   uint64 locked;        // Ist die Sperre aufgehoben?
-
-  // Zur Fehlersuche:
-  char *name;        // Name von der Sperre.
   int process;
-} spinlock;
+} uartlock;
 
-void uart_open(spinlock *lk);
+void uart_open(uartlock *lk);
 
-void uart_close(spinlock *lk);
+void uart_close(uartlock *lk);
 
-int holding(spinlock *lk);
+int holding(uartlock *lk);
+
+void initlock(char *name, uartlock *lock_uart);

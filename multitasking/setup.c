@@ -4,6 +4,7 @@
 #include "riscv.h"
 #include "hardware.h"
 #include "uart.h"
+#include "uartlock.h"
 
 extern int main(void);
 extern void ex(void);
@@ -14,7 +15,7 @@ extern volatile struct uart *uart0;
 //volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
 int interval = 10000000; // 1/10 sekunde
 
-
+//uartlock *lock_uart;
 
 //------------------uartInit------------------//
 // vieles in hardware.h definiert 
@@ -120,11 +121,15 @@ void setup(void)
   pcb[0].sp = 0x80102000;
   pcb[1].pc = 0x80200000;
   pcb[1].sp = 0x80202000;
+  pcb[0].state = READY;
+  pcb[1].state = READY;
 
   timeInterupt();
   uartInit();
   plicinit();
 
+
+  //initlock("uart",lock_uart);
 
   // set M Exception Program Counter to main, for mret, requires gcc -mcmodel=medany
   w_mepc((uint64)0x80100000);

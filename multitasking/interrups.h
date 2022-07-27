@@ -1,1 +1,0 @@
-extern void interrupt_handler(stackframes *s);
