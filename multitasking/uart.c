@@ -29,7 +29,7 @@ char readachar(void)
   }
   #endif
   #if 1
-  if (!buffer_is_empty()){
+  if (!is_empty()){
     char c;
     rb_read(&c);
     return c;

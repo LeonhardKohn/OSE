@@ -1,40 +1,49 @@
 #include "ringbuffer.h"
+#include "types.h"
 
-int buffer_is_full(){
-    if(head+1==tail){
-        return 1;
-    }else{
-        return 0;
-    }
+extern void printstring(char *c);
+
+head = 1;
+tail = 0;
+char ringbuffer[BUFFER_SIZE];
+
+full_flag = 0;
+uint8_t empty_flag = 1;
+
+int is_full(){
+    return full_flag; 
 }
 
-int buffer_is_empty(){
-    if(tail+1==head){
-        return 1;
-    }else{
-        return 0;
-    }
-    
+int is_empty(){
+    return empty_flag;
 }
 
 int rb_write(char c){
-    if(buffer_is_full()){
-        return -1;
-    }else{
-        ringbuffer[head] = c;
-        head = (head+1) % BUFFER_SIZE;
-        if(head == tail){
-            full_flag = 1;
-        }
-    }
+   if (is_full()){
+      return -1;
+   }else{
+      if (empty_flag = 1){
+         empty_flag = 0;
+      }
+      ringbuffer[head] = c;
+      head = (head + 1) % BUFFER_SIZE;
+      if (head == tail){
+         full_flag = 1;
+      }
+   }
 }
 
 int rb_read(char *c){
-    if(buffer_is_empty()){
-        return -1;
-    }else{
-        *c = ringbuffer[tail];
-        tail = (tail+1) % BUFFER_SIZE;
+   if (is_empty()){
+     return -1;
+   }else{
+     if (full_flag = 1){
         full_flag = 0;
-    }
+     }
+     *c = ringbuffer[tail];
+     tail = (tail + 1) % BUFFER_SIZE;
+     if (head == tail){
+        empty_flag = 1;
+     }
+   }
 }

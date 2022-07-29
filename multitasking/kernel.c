@@ -1,7 +1,7 @@
 #include "types.h"
 #include "riscv.h"
 #include "hardware.h"
-#include "ringbuffer.h"
+
 #include "uart.h"
 #include "uartlock.h"
 
@@ -10,6 +10,12 @@ extern void ex(void);
 extern void printstring(char *s);
 extern int rb_write(char c);
 extern int rb_read(char *c);
+extern int is_full();
+extern int is_empty();
+extern int rb_write(char c);
+extern int rb_read(char *c);
+extern void uart_open(uartlock *lk);
+extern void uart_close(uartlock *lk);
 extern int interval;
 
 /** definieren den UART und setzen ihn auf den Pointer 0x10000000 um den offset zu definiren.
@@ -32,6 +38,8 @@ __attribute__((aligned(16))) char kernelstack[4096];
 void printhex(uint64);
 void putachar(char);
 void copyprog(int);
+void panic(char*);
+void config_pmp();
 
 /** schaut welchen Prozess momentan läuft */
 int current_process = 0;
@@ -44,45 +52,53 @@ uint64 tmpRead = 0;
 
 //-----------------syscalls-----------------//
 
-void exception_handler(){
-    printstring("\nERROR!\n");
-    printstring("r_mcause: ");
-    printhex(r_mcause());
-    printstring("r_mepc: ");
-    printhex(r_mepc());
-    printstring("r_mtval: ");
-    printhex(r_mtval());
+void exception_handler()
+{
+  printstring("\nERROR!\n");
+  printstring("r_mcause: ");
+  printhex(r_mcause());
+  printstring("r_mepc: ");
+  printhex(r_mepc());
+  printstring("r_mtval: ");
+  printhex(r_mtval());
 
-    panic("Unknown Error\n");
+  panic("Unknown Error\n");
 }
 
-uint64 yield(stackframes **s, uint64 pc){
-  // Process wechseln 
-  if (pcb[current_process].state == RUNNING){
+uint64 yield(stackframes **s, uint64 pc)
+{
+  // Process wechseln
+  if (pcb[current_process].state == RUNNING)
+  {
     pcb[current_process].state = READY;
-  }  
+  }
   pcb[current_process].pc = pc; // save pc, stack pointer
-  pcb[current_process].sp = (uint64)*s;;
-  pcb[current_process].kernel_sp = r_sp(); // 
+  pcb[current_process].sp = (uint64)*s;
+  ;
+  //printhex(pc);
+  // pcb[current_process].kernel_sp = r_sp(); //
   current_process++;
-  if (current_process > 1) // da nur zwei Processe vorhanden sind 
+  if (current_process > 1) // da nur zwei Processe vorhanden sind
     current_process = 0;
 
-  if (pcb[current_process].state==READY){
-    //hier abfrage auf uartblock
-    //tmpRead = readachar();
-  } else if (pcb[current_process].state==BLOCKED){
+  if (pcb[current_process].state == READY)
+  {
+    // hier abfrage auf uartblock
+    // tmpRead = readachar();
+  }
+  else if (pcb[current_process].state == BLOCKED)
+  {
     current_process++;
-    if (current_process > 1) // da nur zwei Processe vorhanden sind 
+    if (current_process > 1) // da nur zwei Processe vorhanden sind
       current_process = 0;
   }
-  
+
   config_pmp();
   pc = pcb[current_process].pc; // add +4 later!
   *s = (stackframes *)pcb[current_process].sp;
-  uint64 kernel_sp = pcb[current_process].kernel_sp;
-  pcb[current_process].state=RUNNING;
-  w_sp(kernel_sp);
+  // uint64 kernel_sp = pcb[current_process].kernel_sp;
+  pcb[current_process].state = RUNNING;
+  // w_sp(kernel_sp);
   return pc;
 }
 
@@ -115,7 +131,7 @@ uint64 sys_exit(stackframes **s, uint64 pc)
   if (current_process > 1)
     current_process = 0;
 
-  pc = pcb[current_process].pc - 4;
+  pc = pcb[current_process].pc;
 
   return pc;
 }
@@ -127,8 +143,8 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
   {
   case 7: //-----------------Timer Interrupt---------------//
     putachar('I');
-    pc = pc - 4;
-    pc = yield(s,pc);
+    pc = yield(s, pc);
+    pc = pc -4;
     *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
     break;
   case 11:
@@ -142,13 +158,20 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
       uint32 uart_irq = uart0->IIR; // read UART interrupt source
       rb_write(uart0->RBR);         // schreibe das Zeichen in den Ringbuffer
       //printhex(pcb[lock.process].state);
-      if (pcb[lock.process].state==BLOCKED){
+      if (pcb[lock.process].state == BLOCKED)
+      {
         pcb[lock.process].state = READY;
-      }else{
-          //putachar(readachar());
+        //printhex(pcb[lock.process].pc);
       }
-      
-      break;                        // (clears UART interrupt)
+      else
+      {
+        if (is_full()){
+          putachar(readachar());
+        }
+      }
+
+
+      break; // (clears UART interrupt)
 
     default:
       printstring("Unknown Hareware interrupt!");
@@ -156,7 +179,7 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
       printhex(irq);
       break;
     }
-    pc = pc - 4;
+
     *(uint32 *)PLIC_COMPLETE = UART_IRQ; // announce to PLIC that IRQ was handled
     break;
 
@@ -190,8 +213,8 @@ void exception(stackframes *s)
   uint64 sp;
   uint64 pc;
   uint64 retval = 0;
-// überprüfen, ob ein Zeichen vorliegt
-// überprüfen, ob ein Prozess vorliegt, der busy ist
+  // überprüfen, ob ein Zeichen vorliegt
+  // überprüfen, ob ein Prozess vorliegt, der busy ist
 
   nr = s->a7;    // read syscall number from stack
   param = s->a0; // read parameter from stack
@@ -200,14 +223,10 @@ void exception(stackframes *s)
   if ((r_mcause() & (1ULL << 63)) != 0)
   { // lieg ein asyncroner Interrupt vor?
     pc = handle_interrupts(&s, pc);
-    w_mepc(pc + 4);
-    asm volatile("mv a1, %0"
-                 :
-                 : "r"(s));
-    return;
   }
   //-----------------------------Fehler behandlung---------------------//
-  else if (r_mcause() != 8){
+  else if (r_mcause() != 8)
+  {
     exception_handler();
   }
   else
@@ -221,27 +240,28 @@ void exception(stackframes *s)
       putachar((char)param);
       break;
     case 3:
-      if(lock.locked==0){
+      if (lock.locked == 0)
+      {
         close_uart();
-        }
-      if(lock.process==current_process){
-        /*if (!buffer_is_empty()){
-            retval = readachar();
-        }else*/{
-            printhex(pc);
-            retval = readachar();
-            pcb[current_process].state = BLOCKED;
+      }
+      if (lock.process == current_process)
+      {
+          pcb[current_process].state = BLOCKED;
+          lock.process = current_process;
+          if (is_empty())
+          {
             pc = yield(&s, pc);
-        }
-       }else{
-        printstring("Uart is locked from Process "+current_process);
-       }
-      
+          }
+          retval = readachar();
+      }
+      else
+      {
+        printstring("Uart is locked from Process " + current_process);
+      }
 
-      
-        // current process muss busy sein
-        // nächsten Process nehmen der ready ist (passiert in yield)
-        // bei jeder exeption auf ready/ busy überprüfen
+      // current process muss busy sein
+      // nächsten Process nehmen der ready ist (passiert in yield)
+      // bei jeder exeption auf ready/ busy überprüfen
       break;
     case 10:
       close_uart();
@@ -271,14 +291,14 @@ void exception(stackframes *s)
                :
                : "r"(s));
   // nur wenn's ein syscall war, dann ... s->a0 = return value from syscall;
-/*
-  // wenn es einen Interrupt gab muss das zeichen noch in retval geschrieben werden 
-  if ((r_mcause() & (1ULL << 63)) != 0){
-    retval = tmpRead;
-    tmpRead = 0;
-  }
-*/
-  // retval = 0x40;
+  /*
+    // wenn es einen Interrupt gab muss das zeichen noch in retval geschrieben werden
+    if ((r_mcause() & (1ULL << 63)) != 0){
+      retval = tmpRead;
+      tmpRead = 0;
+    }
+  */
+  //retval = 0x40;
   //if ((r_mcause() == 8) && (r_mcause() & (1ULL << 63)) != 0||(r_mcause() & 255)==11)
   {
     s->a0 = retval;
