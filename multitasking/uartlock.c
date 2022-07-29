@@ -59,24 +59,8 @@ void uart_open(uartlock *lk)
  * time, so trying to call open_uart when another process
  * is using the UART will result in an error
  */
-#if 0
+
 // TODO uart_close()
-void uart_close(uartlock *lk)
-{
-  if (lk->locked == 0)
-  {
-    printstring("uart is already closed");
-  }
-  else
-  {
-    lk->locked = 0;
-    lk->name = "uart";
-    lk->process = current_process;
-  }
-}
-
-#endif
-
 
 int close_uart(void){
    if (lock.locked == 0){

@@ -62,15 +62,16 @@ uint64 yield(stackframes **s, uint64 pc){
     pcb[current_process].state = READY;
   }  
   pcb[current_process].pc = pc; // save pc, stack pointer
-  pcb[current_process].sp = (uint64)*s;
+  pcb[current_process].sp = (uint64)*s;;
+  pcb[current_process].kernel_sp = r_sp(); // 
   current_process++;
   if (current_process > 1) // da nur zwei Processe vorhanden sind 
     current_process = 0;
 
   if (pcb[current_process].state==READY){
     //hier abfrage auf uartblock
-    tmpRead = readachar();
-  } else if (pcb[current_process].state==BLOCKED||pcb[current_process].state==RUNNING){
+    //tmpRead = readachar();
+  } else if (pcb[current_process].state==BLOCKED){
     current_process++;
     if (current_process > 1) // da nur zwei Processe vorhanden sind 
       current_process = 0;
@@ -79,8 +80,9 @@ uint64 yield(stackframes **s, uint64 pc){
   config_pmp();
   pc = pcb[current_process].pc; // add +4 later!
   *s = (stackframes *)pcb[current_process].sp;
+  uint64 kernel_sp = pcb[current_process].kernel_sp;
   pcb[current_process].state=RUNNING;
-
+  w_sp(kernel_sp);
   return pc;
 }
 
@@ -125,56 +127,10 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
   {
   case 7: //-----------------Timer Interrupt---------------//
     putachar('I');
-
     pc = pc - 4;
-    #if 0 //TODO Fragen warum der yield aufruf nicht klappt
-    pcb[current_process].pc = pc; // save pc, stack pointer
-    pcb[current_process].sp = (uint64)*s;
-    current_process++; // select new process
-    if (current_process > 1)
-      current_process = 0;
-    pc = pcb[current_process].pc; // add +4 later!
-    *s = (stackframes *)pcb[current_process].sp;
-    if (current_process == 0)
-    { // Switch memory protection to new process
-      w_pmpcfg0(0x00000f0000);
-    }
-    if (current_process == 1)
-    { // only access to Process 1// 2 - full access; 1,0 - no access
-      w_pmpcfg0(0x000f000000);
-    } // only access to Process 1 // 3 - full; 2,1,0 - no access
-#endif
-    //pc = yield(&s,pc);
-
-    //----------------------YIELD KOPIE-----------------
-      // Process wechseln 
-  if (pcb[current_process].state == RUNNING){
-    pcb[current_process].state = READY;
-  } 
-  pcb[current_process].pc = pc; // save pc, stack pointer
-  pcb[current_process].sp = (uint64)*s;
-  current_process++;
-  if (current_process > 1) // da nur zwei Processe vorhanden sind 
-    current_process = 0;
-
-  if (pcb[current_process].state==READY){
-    //hier abfrage auf uartblock
-    tmpRead = readachar();
-  } else if (pcb[current_process].state==BLOCKED||pcb[current_process].state==RUNNING){
-    current_process++;
-    if (current_process > 1) // da nur zwei Processe vorhanden sind 
-      current_process = 0;
-  }
-  
-  config_pmp();
-  pc = pcb[current_process].pc; // add +4 later!
-  *s = (stackframes *)pcb[current_process].sp;
-  pcb[current_process].state=RUNNING;
-//----------------------YIELD KOPIE-----------------
-
+    pc = yield(s,pc);
     *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
     break;
-
   case 11:
       //-------------------------Hardware Interrupt-----------------//
       ;                                 // leere Instruktion
@@ -185,12 +141,11 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
         ;                           // leere Instruktion
       uint32 uart_irq = uart0->IIR; // read UART interrupt source
       rb_write(uart0->RBR);         // schreibe das Zeichen in den Ringbuffer
-      if (pcb[0].state==BLOCKED){
-        pcb[0].state = READY;
-        pc = yield (&s,pc);
+      //printhex(pcb[lock.process].state);
+      if (pcb[lock.process].state==BLOCKED){
+        pcb[lock.process].state = READY;
       }else{
-        //putachar(readachar());
-        //pc = yield (&s,pc);
+          //putachar(readachar());
       }
       
       break;                        // (clears UART interrupt)
@@ -266,27 +221,33 @@ void exception(stackframes *s)
       putachar((char)param);
       break;
     case 3:
-      if(pcb[current_process].state != BLOCKED){
-        if (!buffer_is_empty())
-        {
-          //TODO uart lock abfrage felhlt 
-          retval = readachar();
-        }else{
-          retval = 0;
-          pcb[current_process].state = BLOCKED;
-          pc = yield(&s, pc);
+      if(lock.locked==0){
+        close_uart();
         }
-      }else{
-        pc = yield(&s, pc);
-      }
+      if(lock.process==current_process){
+        /*if (!buffer_is_empty()){
+            retval = readachar();
+        }else*/{
+            printhex(pc);
+            retval = readachar();
+            pcb[current_process].state = BLOCKED;
+            pc = yield(&s, pc);
+        }
+       }else{
+        printstring("Uart is locked from Process "+current_process);
+       }
+      
+
+      
         // current process muss busy sein
         // nächsten Process nehmen der ready ist (passiert in yield)
         // bei jeder exeption auf ready/ busy überprüfen
       break;
     case 10:
-      // uart_close();
+      close_uart();
       break;
     case 11:
+      open_uart();
       break;
     case 23:
       // yield system call
@@ -310,14 +271,15 @@ void exception(stackframes *s)
                :
                : "r"(s));
   // nur wenn's ein syscall war, dann ... s->a0 = return value from syscall;
-
+/*
   // wenn es einen Interrupt gab muss das zeichen noch in retval geschrieben werden 
   if ((r_mcause() & (1ULL << 63)) != 0){
     retval = tmpRead;
     tmpRead = 0;
   }
-
-  if ((r_mcause() == 8) && (r_mcause() & (1ULL << 63)) != 0||(r_mcause() & 255)==11)
+*/
+  // retval = 0x40;
+  //if ((r_mcause() == 8) && (r_mcause() & (1ULL << 63)) != 0||(r_mcause() & 255)==11)
   {
     s->a0 = retval;
   }

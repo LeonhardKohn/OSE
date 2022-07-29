@@ -22,12 +22,15 @@
 };
 
 typedef enum state{
-  RUNNING = 1, READY, BLOCKED
+  RUNNING = 1,
+  READY = 2,
+  BLOCKED = 3
 } state; // 0 bedeutet keiner ist da
 
 typedef struct PCB
 {
   uint64 sp;
+  uint64 kernel_sp;
   uint64 pc;
   state state;
 } PCBs;
