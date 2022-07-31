@@ -4,10 +4,8 @@ typedef struct uartlock {
   int process;
 } uartlock;
 
-void uart_open(uartlock *lk);
+int close_uart(void);
 
-void uart_close(uartlock *lk);
+void open_uart(void);
 
-int holding(uartlock *lk);
-
-void initlock(char *name, uartlock *lock_uart);
+int holding(void);

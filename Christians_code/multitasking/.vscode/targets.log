@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sat Jul 30 10:33:36 2022
+# Make data base, printed on Sat Jul 30 10:33:32 2022
 
 # Variables
 
@@ -25,7 +25,7 @@ GDM_LANG = de_DE.utf8
 # default
 MAKE_COMMAND := make
 # makefile (from 'Makefile', line 9)
-USERDEPS = riscv.h types.h 
+USERDEPS = riscv.h types.h
 # environment
 QT_ACCESSIBILITY = 1
 # automatic
@@ -35,7 +35,7 @@ VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
 .VARIABLES := 
 # environment
-PWD = /home/roku/Dokumente/Uni/OSE/GIT/multitasking
+PWD = /home/roku/Dokumente/Uni/OSE/GIT/Christians_code/multitasking
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
@@ -67,9 +67,9 @@ MAKEFLAGS = pqrR
 # environment
 LESS_TERMCAP_so = [01;33m
 # makefile
-CURDIR := /home/roku/Dokumente/Uni/OSE/GIT/multitasking
+CURDIR := /home/roku/Dokumente/Uni/OSE/GIT/Christians_code/multitasking
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
 # environment
@@ -97,7 +97,7 @@ XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # makefile (from 'Makefile', line 8)
-KERNELOBJS = boot.o kernel.o ex.o setup.o ringbuffer.o uart.o uartlock.o
+KERNELOBJS = boot.o kernel.o ex.o setup.o ringbuffer.o
 # environment
 SESSION_MANAGER = local/kali-laptop:@/tmp/.ICE-unix/1026,unix/kali-laptop:/tmp/.ICE-unix/1026
 # automatic
@@ -223,7 +223,7 @@ XDG_MENU_PREFIX = xfce-
 # environment
 GDMSESSION = lightdm-xsession
 # variable set hash-table stats:
-# Load=106/1024=10%, Rehash=0, Collisions=15/155=10%
+# Load=106/1024=10%, Rehash=0, Collisions=15/146=10%
 
 # Pattern-specific Variable Values
 
@@ -231,9 +231,9 @@ GDMSESSION = lightdm-xsession
 
 # Directories
 
-# . (device 2050, inode 24117249): 43 files, no impossibilities.
+# . (device 2050, inode 19533864): 34 files, no impossibilities.
 
-# 43 files, no impossibilities in 1 directories.
+# 34 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -248,36 +248,11 @@ GDMSESSION = lightdm-xsession
 # 2 implicit rules, 0 (0.0%) terminal.
 # Files
 
-# Not a target:
-user1:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
 userprogs1.h: user1.o user2.o userentry.o riscv.h types.h
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
-#  Last modified 2022-07-29 16:06:23.947774038
+#  Last modified 2022-07-25 18:40:39
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := userprogs1.h
-# automatic
-# * := 
-# automatic
-# < := user1.o
-# automatic
-# + := user1.o user2.o userentry.o riscv.h types.h
-# automatic
-# % := 
-# automatic
-# ^ := user1.o user2.o userentry.o riscv.h types.h
-# automatic
-# ? := user2.o userentry.o
-# automatic
-# | := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=9/17=53%
+#  Successfully updated.
 #  recipe to execute (from 'Makefile', line 26):
 	$(CC) $(CFLAGS) -c user1.c
 	$(CC) $(CFLAGS) -c userentry.S
@@ -287,58 +262,74 @@ userprogs1.h: user1.o user2.o userentry.o riscv.h types.h
 	xxd -i user1.bin > userprogs1.h
 
 # Not a target:
+ex.S:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-18 17:17:37
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
 user2.c:
 #  Implicit rule search has been done.
- 
-#  Last modified 2022-07-25 12:26:20.571966054
+#  Last modified 2022-07-25 14:13:23
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
 user1.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-29 15:11:27.987931962
+ 
+#  Last modified 2022-07-25 18:22:31
 #  File has been updated.
 #  Successfully updated.
 
 user1.o: user1.c hardware.h riscv.h types.h riscv.h types.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'user1'
-#  Last modified 2022-07-29 16:06:23.89577404
+#  Last modified 2022-07-25 18:40:39
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 13):
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+kernel.o: kernel.c hardware.h riscv.h types.h riscv.h types.h
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'kernel'
+#  Last modified 2022-07-25 18:40:40
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 13):
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+boot.o: boot.S hardware.h riscv.h types.h riscv.h types.h
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'boot'
+#  Last modified 2022-07-25 18:40:40
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 16):
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+setup.o: setup.c hardware.h riscv.h types.h riscv.h types.h
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'setup'
+#  Last modified 2022-07-25 18:40:40
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 13):
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # Not a target:
-kernel.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-boot.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-setup.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-25 13:54:19.746350297
+#  Last modified 2022-07-25 16:30:23
 #  File has been updated.
 #  Successfully updated.
 
 userentry.o: userentry.S hardware.h riscv.h types.h riscv.h types.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'userentry'
-#  Last modified 2022-07-29 16:06:46.871772939
+#  Last modified 2022-07-25 18:40:39
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 16):
@@ -346,8 +337,9 @@ userentry.o: userentry.S hardware.h riscv.h types.h riscv.h types.h
 
 userprogs2.h: user1.o user2.o userentry.o riscv.h types.h
 #  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Last modified 2022-07-25 18:40:39
+#  File has been updated.
+#  Successfully updated.
 #  recipe to execute (from 'Makefile', line 34):
 	$(CC) $(CFLAGS) -c user2.c
 	$(CC) $(CFLAGS) -c userentry.S
@@ -364,47 +356,42 @@ clean:
 	-@rm -f *.o *.bin kernel user1 user2 userprogs1.h userprogs2.h
 
 # Not a target:
-uartlock.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
 riscv.h:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:59:14.889226
+#  Last modified 2022-07-04 17:17:32
 #  File has been updated.
 #  Successfully updated.
 
-# Not a target:
-ex.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-uart.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+ex.o: ex.S hardware.h riscv.h types.h riscv.h types.h
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'ex'
+#  Last modified 2022-07-25 18:40:40
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 16):
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 # Not a target:
 userentry.S:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-20 16:07:28.387535
+#  Last modified 2022-06-20 17:27:42
 #  File has been updated.
 #  Successfully updated.
 
-# Not a target:
-ringbuffer.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+ringbuffer.o: ringbuffer.c hardware.h riscv.h types.h riscv.h types.h
+#  Implicit rule search has been done.
+#  Implicit/static pattern stem: 'ringbuffer'
+#  Last modified 2022-07-25 18:40:40
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 13):
+	$(CC) -c -o $@ $< $(CFLAGS)
 
-kernel: boot.o kernel.o ex.o setup.o ringbuffer.o uart.o uartlock.o hardware.h riscv.h types.h userprogs1.h userprogs2.h
+kernel: boot.o kernel.o ex.o setup.o ringbuffer.o hardware.h riscv.h types.h userprogs1.h userprogs2.h
 #  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+#  Last modified 2022-07-25 18:40:40
+#  File has been updated.
+#  Successfully updated.
 #  recipe to execute (from 'Makefile', line 21):
 	$(CC) -g -ffreestanding -fno-common -nostdlib -mno-relax \
 	      -mcmodel=medany -Wl,-T kernel.ld $(KERNELOBJS) -o kernel
@@ -413,7 +400,14 @@ kernel: boot.o kernel.o ex.o setup.o ringbuffer.o uart.o uartlock.o hardware.h r
 # Not a target:
 hardware.h:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-28 11:39:08.10890872
+#  Last modified 2022-07-25 13:58:00
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+ringbuffer.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-25 17:12:58
 #  File has been updated.
 #  Successfully updated.
 
@@ -428,11 +422,9 @@ all: userprogs1.h userprogs2.h kernel
 #  Implicit rule search has been done.
 #  File does not exist.
 #  File has been updated.
-#  Needs to be updated (-q is set).
-# variable set hash-table stats:
-# Load=0/32=0%, Rehash=0, Collisions=0/9=0%
+#  Successfully updated.
 
-run: userprogs1.h userprogs2.h kernel user2 user1
+run: userprogs1.h userprogs2.h kernel
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -440,16 +432,10 @@ run: userprogs1.h userprogs2.h kernel user2 user1
 	qemu-system-riscv64 -nographic -machine virt -smp 1 -bios none -kernel kernel
 	
 
-# Not a target:
-user2:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
 user2.o: user2.c hardware.h riscv.h types.h riscv.h types.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'user2'
-#  Last modified 2022-07-29 16:06:46.85977294
+#  Last modified 2022-07-25 18:40:39
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 13):
@@ -458,30 +444,45 @@ user2.o: user2.c hardware.h riscv.h types.h riscv.h types.h
 # Not a target:
 types.h:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-20 10:26:45.328177
+#  Last modified 2022-06-22 16:56:56
 #  File has been updated.
 #  Successfully updated.
 
 # Not a target:
-.SUFFIXES:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
+kernel.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-25 18:40:35
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+boot.S:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-25 10:23:06
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+setup.c:
+#  Implicit rule search has been done.
+#  Last modified 2022-07-25 13:58:38
+#  File has been updated.
+#  Successfully updated.
 
 # files hash-table stats:
-# Load=27/1024=3%, Rehash=0, Collisions=1/112=1%
+# Load=28/1024=3%, Rehash=0, Collisions=1/175=1%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 55 / storage = 477 B / avg = 8 B
-# current buf: size = 8162 B / used = 477 B / count = 55 / avg = 8 B
+# strcache buffers: 1 (0) / strings = 52 / storage = 429 B / avg = 8 B
+# current buf: size = 8162 B / used = 429 B / count = 52 / avg = 8 B
 
-# strcache performance: lookups = 149 / hit rate = 63%
+# strcache performance: lookups = 202 / hit rate = 74%
 # hash-table stats:
-# Load=55/8192=1%, Rehash=0, Collisions=0/149=0%
-# Finished Make data base on Sat Jul 30 10:33:36 2022
+# Load=52/8192=1%, Rehash=0, Collisions=0/202=0%
+# Finished Make data base on Sat Jul 30 10:33:32 2022
 
  

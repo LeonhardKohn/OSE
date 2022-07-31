@@ -2,6 +2,7 @@
 #include "hardware.h"
 #include "uart.h"
 #include "uartlock.h"
+#include "ringbuffer.h"
 
 volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
 //-----------IO Funktionen--------------//

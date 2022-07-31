@@ -34,9 +34,17 @@ int main(void) {
 
    while (1)
    {
-    syscall(2,'b');
+    #if 0
+    char c;
     for(int i=0;i<100000000;i++);
-    //syscall(23,0);
+    syscall(10,0);
+    c = syscall(3,0);
+    syscall(2,'2');
+    syscall(2,c);
+    syscall(11,0);
+    #endif
+    syscall(2,'2');
+    for(int i=0;i<100000000;i++);    
    }
    
 

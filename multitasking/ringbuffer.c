@@ -3,11 +3,11 @@
 
 extern void printstring(char *c);
 
-head = 1;
-tail = 0;
+int head = 1;
+int tail = 0;
 char ringbuffer[BUFFER_SIZE];
 
-full_flag = 0;
+int full_flag = 0;
 uint8_t empty_flag = 1;
 
 int is_full(){
