@@ -28,8 +28,10 @@ int main(void) {
   */
 
    while(1){
-    //for(int i = 0; i < 100000000; i++);
-    syscall(10, 0);
+    while (!syscall(10, 0)){
+      syscall(1, (uint64)"Process 2 need access to the UART!\n");
+      for(int i = 0; i < 100000000; i++);
+    }
     char c = syscall(3, 0);
     syscall(11, 0);
     syscall(2, c);

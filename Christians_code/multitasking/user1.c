@@ -30,7 +30,10 @@ int main(void) {
   while(1){
     for(int i = 0; i < 100000000; i++);
     syscall(2, 'a');
-    syscall(10, 0);
+    while (!syscall(10, 0)){
+      syscall(1, (uint64)"Process 1 need access to the UART!\n");
+      for(int i = 0; i < 100000000; i++);
+    }
     syscall(11, 0);
   }
 }

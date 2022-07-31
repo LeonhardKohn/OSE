@@ -1,6 +1,6 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory '/home/roku/Dokumente/Uni/OSE/GIT'
-make: Leaving directory '/home/roku/Dokumente/Uni/OSE/GIT'
+make.exe --dry-run --always-make --keep-going --print-directory
+make.exe: Entering directory `c:/Users/Leo/OneDrive - Otto-Friedrich-Universit�t Bamberg/01Uni/Angewandte Informatik/2. Semester/OSE/GIT'
+make.exe: Leaving directory `c:/Users/Leo/OneDrive - Otto-Friedrich-Universit�t Bamberg/01Uni/Angewandte Informatik/2. Semester/OSE/GIT'
  
-make: *** No targets specified and no makefile found.  Stop.
+make.exe: *** No targets specified and no makefile found.  Stop.
 

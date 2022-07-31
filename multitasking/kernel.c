@@ -13,6 +13,7 @@ extern int rb_read(char *c);
 extern int is_full();
 extern int is_empty();
 extern int interval;
+extern uartlock lock; // aus uartlock.c
 
 /** definieren den UART und setzen ihn auf den Pointer 0x10000000 um den offset zu definiren.
  * Wichtig lernen! */
@@ -41,7 +42,7 @@ void config_pmp();
 int current_process = 0;
 /** erstelle ein Array mit der größe Zwei. In diesem Array werden die beiden Prozesse gespeichert */
 PCBs pcb[2];
-uartlock lock;
+
 uint64 tmpRead = 0;
 
 //----------------------------------------------------------------------//
@@ -63,6 +64,7 @@ void exception_handler()
 
 uint64 yield(stackframes **s, uint64 pc)
 {
+  #if 0
   // Process wechseln
   if (pcb[current_process].state == RUNNING)
   {
@@ -89,8 +91,27 @@ uint64 yield(stackframes **s, uint64 pc)
   pc = pcb[current_process].pc; // add +4 later!
   *s = (stackframes *)pcb[current_process].sp;
   pcb[current_process].state = RUNNING;
+  #endif  
+  pcb[current_process].sp = (uint64) *s;
+  pcb[current_process].pc = pc;
 
+  change_process_nr();
+
+  if (pcb[current_process].state == READY){
+     pc = pcb[current_process].pc;
+     *s = (stackframes*) pcb[current_process].sp;
+     config_pmp();
+  }else{
+     change_process_nr();
+  }
   return pc;
+}
+
+void change_process_nr(void){
+  current_process++;
+  if (current_process > 1){
+    current_process = 0;
+  }
 }
 
 // Memory protection wird umgestellt, damit ein Userprozess nicht auf andere Userprozesse zugreifen darf
@@ -127,6 +148,14 @@ uint64 sys_exit(stackframes **s, uint64 pc)
   return pc;
 }
 
+void unblock_process(void){
+  if (pcb[0].state == BLOCKED){
+    pcb[0].state = READY;
+	}else if (pcb[1].state == BLOCKED){
+    pcb[1]. = 0;
+	}	
+}
+
 //------------------------interrupt handler-------------------------//
 uint64 handle_interrupts(stackframes **s, uint64 pc)
 {
@@ -134,9 +163,9 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
   {
   case 7: //-----------------Timer Interrupt---------------//
     putachar('I');
-    pc = yield(s, pc);
     pc = pc - 4;
     *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
+    pc = yield(s, pc);
     break;
   case 11:
       //-------------------------Hardware Interrupt-----------------//
@@ -147,18 +176,10 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
     case UART_IRQ:                  // #define UART_IRQ 10
         ;                           // leere Instruktion
       uint32 uart_irq = uart0->IIR; // read UART interrupt source
-      rb_write(uart0->RBR);         // schreibe das Zeichen in den Ringbuffer
-      if (pcb[lock.process].state == BLOCKED)
-      {
-        pcb[lock.process].state = READY;
-      }
-      else
-      {
-        if (is_full())
-        {
-          putachar(readachar());
-        }
-      }
+      char c = uart0->RBR;
+      rb_write(c);         // schreibe das Zeichen in den Ringbuffer
+        unblock_process();
+	      break;
 
       break; // (clears UART interrupt)
 
@@ -168,7 +189,8 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
       printhex(irq);
       break;
     }
-
+    *(uint32*)PLIC_COMPLETE = irq;
+    pc = pc - 4;
     *(uint32 *)PLIC_COMPLETE = UART_IRQ; // announce to PLIC that IRQ was handled
     break;
 
@@ -196,17 +218,13 @@ void panic(char *errorCode)
 // "exception" is called from the assembler function "ex" in ex.S with registers saved on the stack
 void exception(stackframes *s)
 {
-  uint64 nr;
-  uint64 param;
+  uint64 nr = s->a7;    // read syscall number from stack;
+  uint64 param = s->a0; // read parameter from stack;
   uint64 sp;
-  uint64 pc;
+  uint64 pc = r_mepc(); // read exception PC;
   uint64 retval = 0;
   // überprüfen, ob ein Zeichen vorliegt
   // überprüfen, ob ein Prozess vorliegt, der busy ist
-
-  nr = s->a7;    // read syscall number from stack
-  param = s->a0; // read parameter from stack
-  pc = r_mepc(); // read exception PC
 
   if ((r_mcause() & (1ULL << 63)) != 0)
   { // lieg ein asyncroner Interrupt vor?
@@ -215,13 +233,13 @@ void exception(stackframes *s)
   //-----------------------------Fehler behandlung---------------------//
   else if (r_mcause() != 8)
   {
-    exception_handler();
+    exception_handler();    
   } // Überprüfen, ob der Prozess BLOCKED ist
-  else if (pcb[current_process].state == BLOCKED)
+  else /*if (pcb[current_process].state == BLOCKED)
   {
     pc = yield(&s, pc);
   }
-  else
+  else*/
   {
     switch (nr)
     {
@@ -232,31 +250,19 @@ void exception(stackframes *s)
       putachar((char)param);
       break;
     case 3:
-      if (holding() && current_process != lock.process)
-      {
-        printstring("waiting ...\n");
-        pc = yield(&s, pc);
-      }else if (lock.locked == 0)
-      {
-        close_uart();
-      }
-      if (lock.process == current_process)
-      {
-        pcb[current_process].state = BLOCKED;
-        lock.process = current_process;
-        if (is_empty())
-        {
-          pc = yield(&s, pc);
+    #if 0
+	    if (lock.locked == 1 && lock.process == current_process){
+	      retval = readachar();
+        if (retval == 0){
+          pcb[current_process].state = BLOCKED;
+          pc = yield(&s,pc);
         }
-        retval = readachar();
-      }
-      else
-      {
-        printstring("Uart is locked from Process ");
-        putachar((char)current_process);
-        printstring("\n");
-      }
-
+	    }else{
+        printstring("You need to lock the UART!\n");
+	    }
+    #endif
+    pcb[current_process].state = BLOCKED;
+    retval = readachar();
       // current process muss busy sein
       // nächsten Process nehmen der ready ist (passiert in yield)
       // bei jeder exeption auf ready/ busy überprüfen
@@ -277,6 +283,7 @@ void exception(stackframes *s)
       break;
     case 42: // user program returned, starting from the beginning
       pc = sys_exit(&s, pc);
+      pc = pcb[current_process].pc - 4;
       break;
 
     default:
@@ -287,24 +294,23 @@ void exception(stackframes *s)
     }
   }
 
-  if (!is_empty())
-  {
-    if (pcb[lock.process].state == BLOCKED)
-    {
-      pcb[lock.process].state = READY;
-      pc = yield(&s,pc);
-    }
+  // adjust return value - we want to return to the instruction _after_ the ecall! (at address mepc+4)
+  w_mepc(pc+4);
+
+  // pass the return value back in a0
+  if (r_mcause() != 8 && (r_mcause() & (1ULL<<63)) != 0){
+     asm volatile("mv a0, %0" : : "r" (retval)); 
+  }else{
+     s->a0 = retval;
   }
 
-  // adjust return value - we want to return to the instruction _after_ the ecall! (at address mepc+4)
-  w_mepc(pc + 4);
+  /*if (current_process == 1 && nr == 10){
+    printhex(retval);
+  }*/
+  
+  // this function returns to ex.S
 
-  asm volatile("mv a1, %0"
-               :
-               : "r"(s));
-
-
-  s->a0 = retval;
+  asm volatile("mv a1, %0" : : "r" (s));
 
   // this function returns to ex.S
 }

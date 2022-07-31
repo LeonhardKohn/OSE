@@ -29,13 +29,13 @@ char readachar(void)
         return uart0->RBR;             // then read the character
   }
   #endif
-  #if 1
-  if (!is_empty()){
+
     char c;
-    rb_read(&c);
-    return c;
-  }
-  #endif
+    int error = rb_read(&c);
+    if (error == -1){
+      return 0;
+    }
+    return c; 
 }
 
 void printhex(uint64 x)
