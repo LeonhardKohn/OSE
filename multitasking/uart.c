@@ -22,14 +22,7 @@ void putachar(char c)
   uart0->THR = c;         // then write the character
 }
 
-char readachar(void)
-{
-  #if 0
-  if ((uart0->LSR & (1 << 0)) != 0){
-        return uart0->RBR;             // then read the character
-  }
-  #endif
-
+char readachar(void){
     char c;
     int error = rb_read(&c);
     if (error == -1){

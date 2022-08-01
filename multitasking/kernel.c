@@ -1,17 +1,12 @@
 #include "types.h"
 #include "riscv.h"
 #include "hardware.h"
-
+#include "ringbuffer.h"
 #include "uart.h"
 #include "uartlock.h"
 
 extern int main(void);
 extern void ex(void);
-extern void printstring(char *s);
-extern int rb_write(char c);
-extern int rb_read(char *c);
-extern int is_full();
-extern int is_empty();
 extern int interval;
 extern uartlock lock; // aus uartlock.c
 
@@ -36,20 +31,19 @@ void printhex(uint64);
 void putachar(char);
 void copyprog(int);
 void panic(char *);
-void config_pmp();
+void config_pmp(void);
+void change_process_nr(void);
 
 /** schaut welchen Prozess momentan läuft */
 int current_process = 0;
 /** erstelle ein Array mit der größe Zwei. In diesem Array werden die beiden Prozesse gespeichert */
 PCBs pcb[2];
 
-uint64 tmpRead = 0;
-
 //----------------------------------------------------------------------//
 
 //-----------------syscalls-----------------//
 
-void exception_handler()
+void exception_handler(void)
 {
   printstring("\nERROR!\n");
   printstring("r_mcause: ");
@@ -64,39 +58,9 @@ void exception_handler()
 
 uint64 yield(stackframes **s, uint64 pc)
 {
-  #if 0
-  // Process wechseln
-  if (pcb[current_process].state == RUNNING)
-  {
-    pcb[current_process].state = READY;
-  }
-  pcb[current_process].pc = pc; // save pc, stack pointer
-  pcb[current_process].sp = (uint64)*s;
-  current_process++;
-  if (current_process > 1) // da nur zwei Processe vorhanden sind
-    current_process = 0;
-
-  if (pcb[current_process].state == READY)
-  {
-    // ok
-  }
-  else
-    while (pcb[current_process].state == BLOCKED)
-    {
-      current_process++;
-      if (current_process > 1) // da nur zwei Processe vorhanden sind
-        current_process = 0;
-    }
-  config_pmp();
-  pc = pcb[current_process].pc; // add +4 later!
-  *s = (stackframes *)pcb[current_process].sp;
-  pcb[current_process].state = RUNNING;
-  #endif  
   pcb[current_process].sp = (uint64) *s;
   pcb[current_process].pc = pc;
-
   change_process_nr();
-
   if (pcb[current_process].state == READY){
      pc = pcb[current_process].pc;
      *s = (stackframes*) pcb[current_process].sp;
@@ -104,10 +68,14 @@ uint64 yield(stackframes **s, uint64 pc)
   }else{
      change_process_nr();
   }
+  pcb[current_process].state = RUNNING;
   return pc;
 }
 
 void change_process_nr(void){
+  if(pcb[current_process].state == RUNNING){
+    pcb[current_process].state = READY;
+  }
   current_process++;
   if (current_process > 1){
     current_process = 0;
@@ -149,10 +117,8 @@ uint64 sys_exit(stackframes **s, uint64 pc)
 }
 
 void unblock_process(void){
-  if (pcb[0].state == BLOCKED){
-    pcb[0].state = READY;
-	}else if (pcb[1].state == BLOCKED){
-    pcb[1]. = 0;
+  if (pcb[lock.process].state == BLOCKED){
+    pcb[lock.process].state = READY;
 	}	
 }
 
@@ -178,9 +144,7 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
       uint32 uart_irq = uart0->IIR; // read UART interrupt source
       char c = uart0->RBR;
       rb_write(c);         // schreibe das Zeichen in den Ringbuffer
-        unblock_process();
-	      break;
-
+      unblock_process();
       break; // (clears UART interrupt)
 
     default:
@@ -201,7 +165,6 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
   }
   return pc;
 }
-//------------------------exeption handler-------------------------//
 
 //---------------panic---------------//
 void panic(char *errorCode)
@@ -234,23 +197,31 @@ void exception(stackframes *s)
   else if (r_mcause() != 8)
   {
     exception_handler();    
-  } // Überprüfen, ob der Prozess BLOCKED ist
-  else /*if (pcb[current_process].state == BLOCKED)
-  {
-    pc = yield(&s, pc);
-  }
-  else*/
+  } 
+  else
   {
     switch (nr)
     {
     case 1:
-      printstring((char *)param);
+      if (pcb[current_process].state == BLOCKED){
+        printstring("waiting...\n");
+        pc = yield(&s,pc);
+      } else{
+        printstring((char *)param);
+      }
       break;
     case 2:
-      putachar((char)param);
+      if (pcb[current_process].state == BLOCKED){
+        printstring("waiting...\n");
+        pc = yield(&s,pc);
+      } else{
+        putachar((char)param);
+      }
       break;
     case 3:
-    #if 0
+      if (!holding()){
+        close_uart();
+      }
 	    if (lock.locked == 1 && lock.process == current_process){
 	      retval = readachar();
         if (retval == 0){
@@ -258,20 +229,15 @@ void exception(stackframes *s)
           pc = yield(&s,pc);
         }
 	    }else{
-        printstring("You need to lock the UART!\n");
+        printstring("waiting...\n");
 	    }
-    #endif
-    pcb[current_process].state = BLOCKED;
-    retval = readachar();
-      // current process muss busy sein
-      // nächsten Process nehmen der ready ist (passiert in yield)
-      // bei jeder exeption auf ready/ busy überprüfen
       break;
-    case 10:;
+    case 10:
+      ;
       int return_Uart = close_uart();
       if (return_Uart == 2)
       {
-        printstring("Error! Uart was already closed by another process\n");
+        printstring("\nError! Uart was already closed by another process\n");
       }
       break;
     case 11:
@@ -303,13 +269,7 @@ void exception(stackframes *s)
   }else{
      s->a0 = retval;
   }
-
-  /*if (current_process == 1 && nr == 10){
-    printhex(retval);
-  }*/
   
-  // this function returns to ex.S
-
   asm volatile("mv a1, %0" : : "r" (s));
 
   // this function returns to ex.S

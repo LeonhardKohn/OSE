@@ -9,3 +9,5 @@ int close_uart(void);
 void open_uart(void);
 
 int holding(void);
+
+void initlock();

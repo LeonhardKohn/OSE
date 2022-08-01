@@ -13,13 +13,6 @@ extern void printhex(uint64);
 extern PCBs pcb[];
 extern volatile struct uart *uart0;
 int interval = 10000000; // 1/10 sekunde
-
-
-//------------------uartInit------------------//
-// vieles in hardware.h definiert 
-// uartInit wir in uart.c definiert
-
-
 //------------------plicInit------------------//
 // vieles in riscv.h definiert 
 void plicinit(void)
@@ -133,12 +126,11 @@ void setup(void)
   pcb[1].sp = 0x80202000;
   pcb[1].state = READY;
 
+  // Initialisierung 
   timeInterupt();
   uartInit();
   plicinit();
   initlock();
-
-  //initlock("uart",lock_uart);
 
   // set M Exception Program Counter to main, for mret, requires gcc -mcmodel=medany
   w_mepc((uint64)0x80100000);
