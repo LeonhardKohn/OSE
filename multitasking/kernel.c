@@ -5,20 +5,15 @@
 #include "uart.h"
 #include "uartlock.h"
 
-extern int main(void);
-extern void ex(void);
-extern int interval;
-extern uartlock lock; // aus uartlock.c
+extern int main(void);        // importiert die main von den Usern
+extern int interval;          // gibt das Intervall des Timerinterrups an 
+extern uartlock lock;         // ist eine Struktur aus uartlock.c, die den Zustand des Uarts angeben kann 
 
-/** definieren den UART und setzen ihn auf den Pointer 0x10000000 um den offset zu definiren.
- * Wichtig lernen! */
+/* 
+* - definieren den UART und setzen ihn auf den Pointer 0x10000000 um den offset zu definiren.
+*/
 extern volatile struct uart *uart0;
 
-/** registriert sich mindestens 16 bytes
- * char kernelstack[4096] : minimum 16 bytes (anfangsadress muss durch 16 teilbar sein)
- * registrieren uns auf dem Stack einen gewissen Speicherplatz */
-
-// Kommentar von Christian:
 /*
  * - __attribute__: weißt einer Struktur bestimmte Eigenschaften zu, in diesem Fall dem Stack des Kernels
  * - aligned(16): Die Adresse in der sich der Kernelstack befindet, sollte durch 16 teilbar sein.
@@ -26,16 +21,14 @@ extern volatile struct uart *uart0;
  */
 __attribute__((aligned(16))) char kernelstack[4096];
 
-/** definiert die Header der Funktionen */
-void printhex(uint64);
-void putachar(char);
-void copyprog(int);
-void panic(char *);
+/* definiert die Header der Funktionen in diesem File */
+void panic(char *);                 // gibt einen Errorcode aus und blokiert alles 
 void config_pmp(void);
 void change_process_nr(void);
 
 /** schaut welchen Prozess momentan läuft */
-int current_process = 0;
+int current_process = 0;  
+int command = 0;
 /** erstelle ein Array mit der größe Zwei. In diesem Array werden die beiden Prozesse gespeichert */
 PCBs pcb[2];
 
@@ -143,8 +136,35 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
         ;                           // leere Instruktion
       uint32 uart_irq = uart0->IIR; // read UART interrupt source
       char c = uart0->RBR;
-      rb_write(c);         // schreibe das Zeichen in den Ringbuffer
-      unblock_process();
+      if(c=='\\'){
+        putachar('\\');
+        command = 1;
+      }else {
+        if(command == 1){
+          switch (c)
+          {
+          case 'n':
+            putachar('n');
+            printstring("\n");
+            command=0;
+            break;
+          case 'A':
+            putachar(c);
+            printstring("\nDieses Programm ist von Leonhard Kohn\n");
+            command=0;
+            break;
+          default:
+            putachar(c);
+            printstring("\nUnbekannter Befehl\n");
+            command=0;
+            break;
+          }
+        }else{
+          command = 0;
+          rb_write(c);         // schreibe das Zeichen in den Ringbuffer
+          unblock_process();
+        }
+      }
       break; // (clears UART interrupt)
 
     default:
