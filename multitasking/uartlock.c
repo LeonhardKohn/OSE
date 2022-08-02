@@ -45,7 +45,7 @@ int close_uart(void){
 }
 
 void open_uart(void){
-   lock.locked = 0;
+   lock.locked = 0;   
 }
 
 // Check whether this process is holding the lock.

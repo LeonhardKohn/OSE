@@ -66,7 +66,7 @@ ex:
         ld a3, 96(sp)
         ld a4, 104(sp)
         ld a5, 112(sp)
-        ld a6, 120(sp) // rückgabewert
+        ld a6, 120(sp) 
         ld a7, 128(sp) 
         ld s2, 136(sp)
         ld s3, 144(sp)

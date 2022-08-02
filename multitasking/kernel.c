@@ -5,7 +5,6 @@
 #include "uart.h"
 #include "uartlock.h"
 
-extern int main(void);        // importiert die main von den Usern
 extern int interval;          // gibt das Intervall des Timerinterrups an 
 extern uartlock lock;         // ist eine Struktur aus uartlock.c, die den Zustand des Uarts angeben kann 
 
@@ -17,7 +16,7 @@ extern volatile struct uart *uart0;
 /*
  * - __attribute__: weißt einer Struktur bestimmte Eigenschaften zu, in diesem Fall dem Stack des Kernels
  * - aligned(16): Die Adresse in der sich der Kernelstack befindet, sollte durch 16 teilbar sein.
- * - Hier wird der Kernelstack definiert mit einer Größe von 16 * 4096 = 65536 Bytes
+ * - Hier wird der Kernelstack definiert mit einer Größe von 4096 Bytes
  */
 __attribute__((aligned(16))) char kernelstack[4096];
 
@@ -25,14 +24,28 @@ __attribute__((aligned(16))) char kernelstack[4096];
 void panic(char *);                 // gibt einen Errorcode aus und blokiert alles 
 void config_pmp(void);
 void change_process_nr(void);
+uint64 handle_interrupts(stackframes **s, uint64 pc);
 
 /** schaut welchen Prozess momentan läuft */
 int current_process = 0;  
 int command = 0;
 /** erstelle ein Array mit der größe Zwei. In diesem Array werden die beiden Prozesse gespeichert */
-PCBs pcb[2];
+PCBs pcb[2]; // ist in hardware.h
 
 //----------------------------------------------------------------------//
+// idle Funktion (Prozess wäre besser)
+#if 1
+void idle(){
+  while (pcb[current_process].state==BLOCKED)
+  {
+    if(uart0->IIR==0x00000000000000c4ull||!is_empty()){ // schaut ob ein Zeichen im Uart liegt oder ein Zeichen im Ringbuffer ist. 
+      pcb[current_process].state==READY;
+      return;
+    }
+    change_process_nr();
+  }
+}
+#endif
 
 //-----------------syscalls-----------------//
 
@@ -59,7 +72,13 @@ uint64 yield(stackframes **s, uint64 pc)
      *s = (stackframes*) pcb[current_process].sp;
      config_pmp();
   }else{
-     change_process_nr();
+      change_process_nr();
+    if(pcb[current_process].state == BLOCKED){
+      idle(s);
+      pc = pcb[current_process].pc;
+      *s = (stackframes*) pcb[current_process].sp;
+      config_pmp();
+    }
   }
   pcb[current_process].state = RUNNING;
   return pc;
@@ -118,11 +137,10 @@ void unblock_process(void){
 //------------------------interrupt handler-------------------------//
 uint64 handle_interrupts(stackframes **s, uint64 pc)
 {
-  switch ((r_mcause() & 255))
+  switch ((r_mcause() & 255)) // schauen uns nur das erste byte an 
   {
   case 7: //-----------------Timer Interrupt---------------//
     putachar('I');
-    pc = pc - 4;
     *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
     pc = yield(s, pc);
     break;
@@ -132,9 +150,11 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
     uint32 irq = *(uint32 *)PLIC_CLAIM; // get highest prio interrupt nr
     switch (irq)
     {
-    case UART_IRQ:                  // #define UART_IRQ 10
+    case UART_IRQ:                  // #define UART_IRQ 10; IRQ steht für interrupt request 
         ;                           // leere Instruktion
-      uint32 uart_irq = uart0->IIR; // read UART interrupt source
+      uint32 uart_irq = uart0->IIR; // read UART interrupt source; schauen nach was für ein Uartinterrupt es ist
+      if((uart_irq&15)==4){   // weil wir nur die ersten 4 bits von dem Register haben wollen, Daten sind jetzt verfügbar
+      // Received Data Ready Interrupt (uart_irq sagt aus, was für ein hardwareinterrupt ausgelöst wurde)
       char c = uart0->RBR;
       if(c=='\\'){
         putachar('\\');
@@ -165,6 +185,7 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
           unblock_process();
         }
       }
+      }
       break; // (clears UART interrupt)
 
     default:
@@ -173,9 +194,7 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
       printhex(irq);
       break;
     }
-    *(uint32*)PLIC_COMPLETE = irq;
-    pc = pc - 4;
-    *(uint32 *)PLIC_COMPLETE = UART_IRQ; // announce to PLIC that IRQ was handled
+    *(uint32 *)PLIC_COMPLETE = irq; // announce to PLIC that IRQ was handled
     break;
 
   default:
@@ -183,6 +202,7 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
     printhex(r_mcause());
     break;
   }
+  pc = pc - 4;
   return pc;
 }
 
@@ -206,8 +226,6 @@ void exception(stackframes *s)
   uint64 sp;
   uint64 pc = r_mepc(); // read exception PC;
   uint64 retval = 0;
-  // überprüfen, ob ein Zeichen vorliegt
-  // überprüfen, ob ein Prozess vorliegt, der busy ist
 
   if ((r_mcause() & (1ULL << 63)) != 0)
   { // lieg ein asyncroner Interrupt vor?
@@ -238,7 +256,7 @@ void exception(stackframes *s)
         putachar((char)param);
       }
       break;
-    case 3:
+    case 3: // readachar
       if (!holding()){
         close_uart();
       }
@@ -249,7 +267,9 @@ void exception(stackframes *s)
           pc = yield(&s,pc);
         }
 	    }else{
+        pcb[current_process].state = BLOCKED;
         printstring("waiting...\n");
+        pc = yield(&s,pc);
 	    }
       break;
     case 10:
@@ -284,12 +304,10 @@ void exception(stackframes *s)
   w_mepc(pc+4);
 
   // pass the return value back in a0
-  if (r_mcause() != 8 && (r_mcause() & (1ULL<<63)) != 0){
-     asm volatile("mv a0, %0" : : "r" (retval)); 
-  }else{
+  if (r_mcause() == 8){
      s->a0 = retval;
   }
-  
+  // um stack wiederherzustellen 
   asm volatile("mv a1, %0" : : "r" (s));
 
   // this function returns to ex.S
