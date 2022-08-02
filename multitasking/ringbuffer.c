@@ -3,7 +3,7 @@
 
 extern void printstring(char *c);
 
-int head = 1;
+int head = 0;
 int tail = 0;
 char ringbuffer[BUFFER_SIZE];
 

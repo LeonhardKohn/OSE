@@ -39,8 +39,11 @@ void idle(){
   while (pcb[current_process].state==BLOCKED)
   {
     if(uart0->IIR==0x00000000000000c4ull||!is_empty()){ // schaut ob ein Zeichen im Uart liegt oder ein Zeichen im Ringbuffer ist. 
-      pcb[current_process].state==READY;
-      return;
+      if(lock.process==current_process){
+        pcb[current_process].state==READY;
+        return;
+      }
+      
     }
     change_process_nr();
   }
