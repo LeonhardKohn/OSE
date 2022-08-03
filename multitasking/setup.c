@@ -26,9 +26,9 @@ int interval = 10000000; // intervall für den Timerinterrupt
 // vieles in riscv.h definiert 
 void plicinit(void)
 {
-  // set desired IRQ priorities non-zero (otherwise disabled).
+  // gewünschte IRQ-Prioritäten ungleich Null setzen (sonst deaktiviert).
   *(uint32*)(PLIC_PRIORITY + UART_IRQ*4) = 1;
-  *(uint32*)(PLIC_PRIORITY + VIRTIO0_IRQ*4) = 1; // VIRTIO0_IRQ = 1 
+  *(uint32*)(PLIC_PRIORITY + VIRTIO0_IRQ*4) = 1; // VIRTIO0_IRQ = 1 (nicht implementiert)
   *(uint32*)PLIC_THRESHOLD = 0;
   *(uint32*)PLIC_ENABLE = (1<<UART_IRQ); // UART_IRQ = 10
 
@@ -41,7 +41,7 @@ void plicinit(void)
 
 void copyprog(int process, uint64 address)
 {
-  // copy user code to memory inefficiently... :)
+  // ineffizientes Kopieren von Anwendercode in den Speicher... :)
   unsigned char *from;
   int user_bin_len;
   switch (process)
@@ -87,7 +87,7 @@ void timeInterupt(void)
 
 void setup(void) // wird von der boot.S aufgerufen (start des Betriebsystems)
 {
-  // set M Previous Privilege mode to User so mret returns to user mode.
+  // M Previous Privilege mode auf User setzen, damit mret in den Benutzermodus zurückkehrt.
   unsigned long x = r_mstatus();
   x &= ~MSTATUS_MPP_MASK; // '~' bitweise negation, schreibt in bit 11 & 12 eine 0; 
   // stellen sicher, in welchem mode er zurückspringen soll (User-Mode)
@@ -97,37 +97,41 @@ void setup(void) // wird von der boot.S aufgerufen (start des Betriebsystems)
   // enable software interrupts (ecall) in M mode.
   w_mie(r_mie() | MIE_MSIE); 
 
-  // set the machine-mode trap handler to jump to function "ex.S" when a trap occurs.
+  // den exception-handler im Maschinenmodus so einstellen, dass er beim Auftreten eines Traps zur Funktion "ex.S" springt.
   w_mtvec((uint64)ex);
 
-  // disable paging for now.
+  // Paging vorerst deaktivieren. (Virtual Memory)
   w_satp(0);
 
-  /* Hier wird die physical memory protection eingestellt.
+  /* 
+   * Hier wird die physical memory protection eingestellt.
    * pmpaddr0 - Bereich für Peripheriegeräte 	-> ist für den User gesperrt
-   * pmpaddr1 - Bereich des Kernels		-> ist für den User gesperrt
+   * pmpaddr1 - Bereich des Kernels		        -> ist für den User gesperrt
    * pmpaddr2 - Bereich des 1. User-Prozesses	-> ist für andere User-Prozesse gesperrt
    * pmpaddr3 - Bereich des 2. User-Prozesses	-> ist für andere User-Prozesse gesperrt
-   * pmpaddr4 - Rest (andere Prozesse)		-> ist hier für beide User gesperrt */
+   * pmpaddr4 - Rest (andere Prozesse)		    -> ist hier für beide User gesperrt 
+  */
 
-  // configure Physical Memory Protection to give user mode access to all of physical memory.
+  // den Schutz des physischen Speichers so konfigurieren, dass der Benutzermodus Zugriff auf den gesamten physischen Speicher erhält.
   w_pmpaddr0(0x80000000ull >> 2);
   w_pmpaddr1(0x80100000ull >> 2);
   w_pmpaddr2(0x80200000ull >> 2);
   w_pmpaddr3(0x80300000ull >> 2);
   w_pmpaddr4(0xffffffffull >> 2);
-    /* 0x00(addr4)00(addr3)0f(addr2)00(addr1)00(addr0)
+  /* 
+   * 0x00(addr4)00(addr3)0f(addr2)00(addr1)00(addr0)
    * 00 = Keine Zugriffsrechte
-   * 0f = Alle Zugriffsrechte */
-  // Add configuration for PMP so that the I/O and kernel address space is protected
-  w_pmpcfg0(0x00000f0000); // only access to Process 1
+   * 0f = Alle Zugriffsrechte 
+  */
+  // Hinzufügen der Konfiguration für PMP, so dass der I/O- und Kernel-Adressraum geschützt ist
+  w_pmpcfg0(0x00000f0000); // nur Zugang zu Prozess 1
 
   
   // Maschinencode der Prozesse werden zu den zugewiesenen Speicherstellen kopiert
   copyprog(0, 0x80100000);
   copyprog(1, 0x80200000);
 
-  // Add initalization of correct values in the PCB for all processes.
+  // Initialisierung der korrekten Werte in dem PCB für alle Prozesse.
   pcb[0].pc = 0x80100000;
   pcb[0].sp = 0x80102000;
   pcb[0].state = READY;
@@ -135,15 +139,15 @@ void setup(void) // wird von der boot.S aufgerufen (start des Betriebsystems)
   pcb[1].sp = 0x80202000;
   pcb[1].state = READY;
 
-  // Initialisierung 
+  // verschiedene Initialisierung
   timeInterupt();
   uartInit();
   plicinit();
   initlock();
 
-  // set M Exception Program Counter to main, for mret, requires gcc -mcmodel=medany
+  // M Exception Program Counter zu main setzen, für mret, gcc -mcmodel=medany anfordern
   w_mepc((uint64)0x80100000); // bei welchem User wir anfangen sollen, wenn wir den Maschienmode verlassen 
 
-  // switch to user mode (configured in mstatus) and jump to address in mepc CSR -> main().
+  // Wechsel in den Usermodus (konfiguriert in mstatus) und Sprung zur Adresse in mepc CSR -> main().
   asm volatile("mret"); // gehen aus dem maschienenmode heraus
 }

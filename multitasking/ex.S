@@ -1,18 +1,12 @@
 .globl ex
 .globl exception
 .align 4
+        ex:                 // Wert von SP nach dem Speichern aller Register an die Exception-Funktion zu übergeben       
+        addi sp, sp, -256   // Platz zum Speichern von Registern schaffen.
 
-// TODO 3.2: Add code to pass the value of SP after all registers are saved to the exception function
-
-
-
-ex:
-        // make room to save registers.
-        addi sp, sp, -256
-
-        // save the registers.
+        // Speichern der Register.
         sd ra, 0(sp)
-        //sd sp, 8(sp)
+        //sd sp, 8(sp)      // SP nicht speichern
         sd gp, 16(sp)
         sd tp, 24(sp)
         sd t0, 32(sp)
@@ -44,15 +38,14 @@ ex:
         sd t6, 240(sp)
 
         mv a0, sp
-        // call the C trap handler in trap.c
-        // ruft exception aus dem Kernel auf
-        call exception
+       
+        call exception    // ruft exception aus dem Kernel auf
         
         mv sp, a1
 
-        // restore registers.
+        // Register wiederherstellen.
         ld ra, 0(sp)
-        //ld sp, 8(sp)
+        //ld sp, 8(sp)   // nicht laden, da wir den sp aus a1 oben geladen haben 
         ld gp, 16(sp)
         ld tp, 24(sp)
         ld t0, 32(sp)
@@ -60,7 +53,7 @@ ex:
         ld t2, 48(sp)
         ld s0, 56(sp)
         ld s1, 64(sp)
-        ld a0, 72(sp) // it's the return value... but only for syscalls :)
+        ld a0, 72(sp)    //  es ist der Rückgabewert... aber nur für Syscalls :)
         ld a1, 80(sp)
         ld a2, 88(sp)
         ld a3, 96(sp)
@@ -85,6 +78,6 @@ ex:
 
         addi sp, sp, 256
 
-        // return to whatever we were doing before...
-        mret
+        // zu dem zurückkehren, was wir vorher getan haben...
+        mret // (aus dem Maschienen Mode)
 

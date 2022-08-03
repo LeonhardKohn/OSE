@@ -9,23 +9,23 @@ volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
 void printstring(char *s)
 {
   while (*s)
-  {                       // as long as the character is not null
-    putachar(*s);         // output the character
-    s++;                  // and progress to the next character
+  {                       // Solange das Zeichen nicht Null ist
+    putachar(*s);         // das Zeichen ausgeben
+    s++;                  // und weiter zum nächsten Zeichen
   }
 }
 
 void putachar(char c)
 {
   while ((uart0->LSR & (1 << 5)) == 0)
-    ;                     // do nothing - wait until bit 5 of LSR = 1
-  uart0->THR = c;         // then write the character
+    ;                     // nichts tun - warten, bis Bit 5 des LSR = 1
+  uart0->THR = c;         // dann das Zeichen schreiben
 }
 
 char readachar(void){
     char c;
-    int error = rb_read(&c);
-    if (error == -1){
+    int error = rb_read(&c);  // liese ein Zeichen aus dem Ringbuffer 
+    if (error == -1){         // wenn kein zeichen im ringbuffer ist gib 0 zurück
       return 0;
     }
     return c; 

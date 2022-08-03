@@ -6,41 +6,38 @@
 
 extern int current_process;
 extern void panic(char *c);
-uartlock lock;
+uartlock lock;              // erstellt struktur
 
 void initlock(){
   lock.locked = 0;
   lock.process = -1; 
 }
 
-//TODO
-// Acquire the lock.
+// TODO Acquire the lock.
 // Loops (spins) until the lock is acquired.
 void acquire(){
     //asm("cli");
-  
 }
-//TODO
-// Release the lock.
+// TODO Release the lock.
 void release(){
   //asm ("sti");
-
 }
+
 /**
- * A process that wants to read characters from the UART
- * now has to open it before and close it afterwards.
- * Only a single process may access the UART at the same
- * time, so trying to call open_uart when another process
- * is using the UART will result in an error
+ * Ein Prozess, der Zeichen aus dem UART lesen will,
+ * muss ihn nun vorher öffnen und danach schließen.
+ * Nur ein einziger Prozess kann gleichzeitig auf den UART zugreifen,
+ * so dass der Versuch, open_uart aufzurufen, wenn ein anderer Prozess
+ * den UART benutzt, zu einem Fehler führt.
  */
 
 int close_uart(void){
-   if (lock.locked == 0){ //wenn offen, dann schließe den UART
+   if (lock.locked == 0){         // wenn offen, dann schließe den UART
       lock.locked= 1;
       lock.process = current_process;
-      return 1; //uart ist jetzt zu 
+      return 1;                  // uart ist jetzt zu 
    }else{
-      return 2; // uart war schon vorher zu (Fehlerbehandlung)
+      return 2;                  // uart war schon vorher zu (Fehlerbehandlung)
    }
 }
 
@@ -48,8 +45,7 @@ void open_uart(void){
    lock.locked = 0;   
 }
 
-// Check whether this process is holding the lock.
-// Interrupts must be off.
+// Prüfen, ob dieser Prozess den lock hält.
 int holding(void){
   if (lock.locked==1)
   {
@@ -58,14 +54,3 @@ int holding(void){
     return 0;
   } 
 }
-
-
-// push_off/pop_off are like intr_off()/intr_on() except that they are matched:
-// it takes two pop_off()s to undo two push_off()s.  Also, if interrupts
-// are initially off, then push_off, pop_off leaves them off.
-
-
-
-
-
-

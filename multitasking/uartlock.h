@@ -1,7 +1,7 @@
 // Gegenseitiges Ausschlussverfahren.
 typedef struct uartlock {
   uint64 locked;        // Ist die Sperre aufgehoben?
-  int process;
+  int process;          // speichert den momentanen Prozess
 } uartlock;
 
 int close_uart(void);

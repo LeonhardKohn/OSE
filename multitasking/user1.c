@@ -33,13 +33,12 @@ int main(void) {
       while (1)
    {
     char c;
-    for(int i=0;i<100000000;i++);
+    for(int i=0;i<10000000;i++);
     syscall(10,0);
     c = syscall(3,0);
     syscall(2,'1');
     syscall(2,c);
     syscall(11,0);
-    //syscall(23,0);
    }
 
 }

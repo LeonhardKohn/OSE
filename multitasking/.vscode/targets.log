@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Tue Aug  2 16:43:00 2022
+# Make data base, printed on Wed Aug  3 10:50:50 2022
 
 # Variables
 
@@ -77,7 +77,7 @@ LESS_TERMCAP_ue = [0m
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_AUTH_SOCK = /tmp/ssh-XXXXXXrIM9ru/agent.1013
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXX55LdNK/agent.1025
 # default
 .SHELLFLAGS := -c
 # environment
@@ -91,7 +91,7 @@ MAKEFILE_LIST := Makefile
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 1758
+VSCODE_PID = 1713
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -99,7 +99,7 @@ XDG_SESSION_TYPE = x11
 # makefile (from 'Makefile', line 8)
 KERNELOBJS = boot.o kernel.o ex.o setup.o ringbuffer.o uart.o uartlock.o
 # environment
-SESSION_MANAGER = local/kali-laptop:@/tmp/.ICE-unix/1013,unix/kali-laptop:/tmp/.ICE-unix/1013
+SESSION_MANAGER = local/kali-laptop:@/tmp/.ICE-unix/1025,unix/kali-laptop:/tmp/.ICE-unix/1025
 # automatic
 *F = $(notdir $*)
 # environment
@@ -175,7 +175,7 @@ GTK_MODULES = gail:atk-bridge:appmenu-gtk-module
 # default
 MAKE_VERSION := 4.3
 # environment
-SSH_AGENT_PID = 1067
+SSH_AGENT_PID = 1082
 # environment
 _ = /usr/share/code/code
 # environment
@@ -256,9 +256,29 @@ user1:
 
 userprogs1.h: user1.o user2.o userentry.o riscv.h types.h
 #  Implicit rule search has not been done.
-#  Last modified 2022-08-02 16:42:24.925788263
+#  Implicit/static pattern stem: ''
+#  Last modified 2022-08-02 17:13:09.52381421
 #  File has been updated.
-#  Successfully updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := userprogs1.h
+# automatic
+# * := 
+# automatic
+# < := user1.o
+# automatic
+# + := user1.o user2.o userentry.o riscv.h types.h
+# automatic
+# % := 
+# automatic
+# ^ := user1.o user2.o userentry.o riscv.h types.h
+# automatic
+# ? := user2.o userentry.o
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=9/17=53%
+ 
 #  recipe to execute (from 'Makefile', line 26):
 	$(CC) $(CFLAGS) -c user1.c
 	$(CC) $(CFLAGS) -c userentry.S
@@ -270,7 +290,7 @@ userprogs1.h: user1.o user2.o userentry.o riscv.h types.h
 # Not a target:
 user2.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-08-02 14:14:29.520905324
+#  Last modified 2022-08-02 16:43:09.661789024
 #  File has been updated.
 #  Successfully updated.
 
@@ -284,7 +304,7 @@ user1.c:
 user1.o: user1.c hardware.h riscv.h types.h riscv.h types.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'user1'
-#  Last modified 2022-08-02 16:42:24.869788262
+#  Last modified 2022-08-02 17:13:09.499814211
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 13):
@@ -295,7 +315,6 @@ kernel.o:
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
- 
 
 # Not a target:
 boot.o:
@@ -319,7 +338,7 @@ Makefile:
 userentry.o: userentry.S hardware.h riscv.h types.h riscv.h types.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'userentry'
-#  Last modified 2022-08-02 16:42:24.901788263
+#  Last modified 2022-08-02 17:13:17.971813838
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 16):
@@ -327,28 +346,8 @@ userentry.o: userentry.S hardware.h riscv.h types.h riscv.h types.h
 
 userprogs2.h: user1.o user2.o userentry.o riscv.h types.h
 #  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
-#  Last modified 2022-08-02 15:15:13.152745017
-#  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := userprogs2.h
-# automatic
-# * := 
-# automatic
-# < := user1.o
-# automatic
-# + := user1.o user2.o userentry.o riscv.h types.h
-# automatic
-# % := 
-# automatic
-# ^ := user1.o user2.o userentry.o riscv.h types.h
-# automatic
-# ? := user1.o userentry.o
-# automatic
-# | := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=9/17=53%
+#  Modification time never checked.
+#  File has not been updated.
 #  recipe to execute (from 'Makefile', line 34):
 	$(CC) $(CFLAGS) -c user2.c
 	$(CC) $(CFLAGS) -c userentry.S
@@ -450,7 +449,7 @@ user2:
 user2.o: user2.c hardware.h riscv.h types.h riscv.h types.h
 #  Implicit rule search has been done.
 #  Implicit/static pattern stem: 'user2'
-#  Last modified 2022-08-02 15:15:13.128745018
+#  Last modified 2022-08-02 17:13:17.959813839
 #  File has been updated.
 #  Successfully updated.
 #  recipe to execute (from 'Makefile', line 13):
@@ -483,6 +482,6 @@ types.h:
 # strcache performance: lookups = 149 / hit rate = 63%
 # hash-table stats:
 # Load=55/8192=1%, Rehash=0, Collisions=0/149=0%
-# Finished Make data base on Tue Aug  2 16:43:00 2022
+# Finished Make data base on Wed Aug  3 10:50:50 2022
 
  

@@ -5,13 +5,10 @@
 #include "uart.h"
 #include "uartlock.h"
 
-extern int interval;          // gibt das Intervall des Timerinterrups an 
-extern uartlock lock;         // ist eine Struktur aus uartlock.c, die den Zustand des Uarts angeben kann 
+extern int interval;  // gibt das Intervall des Timerinterrups an
+extern uartlock lock; // ist eine Struktur aus uartlock.c, die den Zustand des Uarts angeben kann
 
-/* 
-* - definieren den UART und setzen ihn auf den Pointer 0x10000000 um den offset zu definiren.
-*/
-extern volatile struct uart *uart0;
+extern volatile struct uart *uart0; // definieren den UART und setzen ihn auf den Pointer 0x10000000 um den offset zu definiren.
 
 /*
  * - __attribute__: weißt einer Struktur bestimmte Eigenschaften zu, in diesem Fall dem Stack des Kernels
@@ -20,39 +17,37 @@ extern volatile struct uart *uart0;
  */
 __attribute__((aligned(16))) char kernelstack[4096];
 
-/* definiert die Header der Funktionen in diesem File */
-void panic(char *);                 // gibt einen Errorcode aus und blokiert alles 
-void config_pmp(void);
-void change_process_nr(void);
-uint64 handle_interrupts(stackframes **s, uint64 pc);
+//-----------definiert die Header der Funktionen in diesem File-----------//
+void panic(char *);                                   // gibt einen Errorcode aus und blokiert alles
+void config_pmp(void);                                // konfiguriert pmp (pysical memory protection) bei einem prozess wechsel neu
+void change_process_nr(void);                         // wechselt die Prozesse
+uint64 handle_interrupts(stackframes **s, uint64 pc); // behandelt die verschiedenen asyncronen Interrupts
 
-/** schaut welchen Prozess momentan läuft */
-int current_process = 0;  
-int command = 0;
-/** erstelle ein Array mit der größe Zwei. In diesem Array werden die beiden Prozesse gespeichert */
-PCBs pcb[2]; // ist in hardware.h
+//-----------Globale variablen-----------//
+int current_process = 0; // gibt momentanen Prozess an
+int command = 0;         // boolean, der angibt, ob gerade ein backslash eingegeben wurde
+PCBs pcb[2];             // Program Controll Block für die beiden Prozesse; Ist in hardware.h
 
 //----------------------------------------------------------------------//
 // idle Funktion (Prozess wäre besser)
-#if 1
-void idle(){
-  while (pcb[current_process].state==BLOCKED)
+void idle()
+{
+  while (pcb[current_process].state == BLOCKED)
   {
-    if(uart0->IIR==0x00000000000000c4ull||!is_empty()){ // schaut ob ein Zeichen im Uart liegt oder ein Zeichen im Ringbuffer ist. 
-      if(lock.process==current_process){
-        pcb[current_process].state==READY;
+    if (uart0->IIR == 0x00000000000000c4ull || !is_empty())
+    { // schaut ob ein Zeichen im Uart liegt oder ein Zeichen im Ringbuffer ist.
+      if (lock.process == current_process)
+      {
+        pcb[current_process].state == READY;
         return;
       }
-      
     }
     change_process_nr();
   }
 }
-#endif
 
-//-----------------syscalls-----------------//
-
-void exception_handler(void)
+//-----------------Hilfsfunktionen für den Kernel-----------------//
+void error_handler(void)
 {
   printstring("\nERROR!\n");
   printstring("r_mcause: ");
@@ -65,52 +60,68 @@ void exception_handler(void)
   panic("Unknown Error\n");
 }
 
-uint64 yield(stackframes **s, uint64 pc)
-{
-  pcb[current_process].sp = (uint64) *s;
-  pcb[current_process].pc = pc;
-  change_process_nr();
-  if (pcb[current_process].state == READY){
-     pc = pcb[current_process].pc;
-     *s = (stackframes*) pcb[current_process].sp;
-     config_pmp();
-  }else{
-      change_process_nr();
-    if(pcb[current_process].state == BLOCKED){
-      idle(s);
-      pc = pcb[current_process].pc;
-      *s = (stackframes*) pcb[current_process].sp;
-      config_pmp();
-    }
-  }
-  pcb[current_process].state = RUNNING;
-  return pc;
-}
-
-void change_process_nr(void){
-  if(pcb[current_process].state == RUNNING){
-    pcb[current_process].state = READY;
-  }
-  current_process++;
-  if (current_process > 1){
-    current_process = 0;
-  }
-}
-
 // Memory protection wird umgestellt, damit ein Userprozess nicht auf andere Userprozesse zugreifen darf
 void config_pmp(void)
 {
   if (current_process == 0)
   {
-    w_pmpcfg0(0x00000f0000); // Switch memory protection to new process
+    w_pmpcfg0(0x00000f0000);       // Speicherschutz auf neuen Prozess umschalten
   }
   else
   {
-    w_pmpcfg0(0x000f000000); // only access to Process 1// 2 - full access; 1,0 - no access
+    w_pmpcfg0(0x000f000000);       // nur Zugriff auf Prozess 1; 2 - voller Zugriff; 1,0 - kein Zugriff
   }
 }
 
-uint64 sys_exit(stackframes **s, uint64 pc)
+void unblock_process(void)         // wechselt Prozess
+{
+  if (pcb[lock.process].state == BLOCKED)
+  {
+    pcb[lock.process].state = READY;
+  }
+}
+
+//-----------------syscalls-----------------//
+uint64 yield(stackframes **s, uint64 pc)         // nr = 23
+{
+  pcb[current_process].sp = (uint64)*s;
+  pcb[current_process].pc = pc;
+  change_process_nr();                          // speichere und wechsele den Prozess
+  if (pcb[current_process].state == READY)      // schaut, ob der Prozess READY ist 
+  {                                             // wenn ja, lade den Prozess
+    pc = pcb[current_process].pc;
+    *s = (stackframes *)pcb[current_process].sp;
+    config_pmp();
+  }
+  else
+  {                                              // sonst wechsele zu nächsten Prozess
+    change_process_nr();  
+    if (pcb[current_process].state == BLOCKED)   // falls auch dieser BLOCKED ist, gehe in die idle Funktion
+    {
+      idle(s);
+      pc = pcb[current_process].pc;
+      *s = (stackframes *)pcb[current_process].sp;
+      config_pmp();
+    }
+  }
+  pcb[current_process].state = RUNNING;          // setze den Prozess auf RUNNING
+  return pc;
+}
+
+void change_process_nr(void)
+{
+  if (pcb[current_process].state == RUNNING)
+  {
+    pcb[current_process].state = READY;
+  }
+  current_process++;                             // Prozess wird gewechselt; müsste eine while(...) sein bei mehreren Prozessen 
+  if (current_process > 1)
+  {
+    current_process = 0;
+  }
+}
+
+uint64 sys_exit(stackframes **s, uint64 pc)      // startet die Prozesse neu; Round Robin
 {
   if (current_process == 0)
   {
@@ -131,73 +142,71 @@ uint64 sys_exit(stackframes **s, uint64 pc)
   return pc;
 }
 
-void unblock_process(void){
-  if (pcb[lock.process].state == BLOCKED){
-    pcb[lock.process].state = READY;
-	}	
-}
-
 //------------------------interrupt handler-------------------------//
 uint64 handle_interrupts(stackframes **s, uint64 pc)
 {
-  switch ((r_mcause() & 255)) // schauen uns nur das erste byte an 
+  switch ((r_mcause() & 255))                   // schauen uns nur das erste byte an
   {
   case 7: //-----------------Timer Interrupt---------------//
     putachar('I');
     *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
     pc = yield(s, pc);
     break;
-  case 11:
+  case 11:;
       //-------------------------Hardware Interrupt-----------------//
-      ;                                 // leere Instruktion
-    uint32 irq = *(uint32 *)PLIC_CLAIM; // get highest prio interrupt nr
+    uint32 irq = *(uint32 *)PLIC_CLAIM;        // höchste Prio-interrupt nr
     switch (irq)
     {
-    case UART_IRQ:                  // #define UART_IRQ 10; IRQ steht für interrupt request 
-        ;                           // leere Instruktion
-      uint32 uart_irq = uart0->IIR; // read UART interrupt source; schauen nach was für ein Uartinterrupt es ist
-      if((uart_irq&15)==4){   // weil wir nur die ersten 4 bits von dem Register haben wollen, Daten sind jetzt verfügbar
-      // Received Data Ready Interrupt (uart_irq sagt aus, was für ein hardwareinterrupt ausgelöst wurde)
-      char c = uart0->RBR;
-      if(c=='\\'){
-        putachar('\\');
-        command = 1;
-      }else {
-        if(command == 1){
-          switch (c)
+    case UART_IRQ:;                            // UART_IRQ = 10; IRQ steht für interrupt request
+      uint32 uart_irq = uart0->IIR;            // UART interrupt source lesen; schauen nach was für ein Uartinterrupt es ist
+      if ((uart_irq & 15) == 4)
+      {                                        // weil wir nur die ersten 4 bits von dem Register haben wollen, Daten sind jetzt verfügbar
+                                               // uart_irq sagt aus, was für ein hardwareinterrupt ausgelöst wurde
+        char c = uart0->RBR;
+        if (c == '\\')                         // kleine Spielerrei, probiert ein paar Commands einzufügen
+        {
+          putachar('\\');
+          command = 1;
+        }
+        else
+        {
+          if (command == 1)
           {
-          case 'n':
-            putachar('n');
-            printstring("\n");
-            command=0;
-            break;
-          case 'A':
-            putachar(c);
-            printstring("\nDieses Programm ist von Leonhard Kohn\n");
-            command=0;
-            break;
-          default:
-            putachar(c);
-            printstring("\nUnbekannter Befehl\n");
-            command=0;
-            break;
+            switch (c)
+            {
+            case 'n':
+              putachar('n');
+              printstring("\n");
+              command = 0;
+              break;
+            case 'A':
+              putachar(c);
+              printstring("\nDieses Programm ist von Leonhard Kohn\n");
+              command = 0;
+              break;
+            default:
+              putachar(c);
+              printstring("\nUnbekannter Befehl\n");
+              command = 0;
+              break;
+            }
           }
-        }else{
-          command = 0;
-          rb_write(c);         // schreibe das Zeichen in den Ringbuffer
-          unblock_process();
+          else
+          {
+            command = 0;
+            rb_write(c);                         // schreibe das Zeichen in den Ringbuffer
+            unblock_process();
+          }
         }
       }
-      }
-      break; // (clears UART interrupt)
-
+      break;                                     // Hardwareinterrupt ende
     default:
       printstring("Unknown Hareware interrupt!");
       printhex(r_mcause());
       printhex(irq);
       break;
     }
-    *(uint32 *)PLIC_COMPLETE = irq; // announce to PLIC that IRQ was handled
+    *(uint32 *)PLIC_COMPLETE = irq;              // dem PLIC mitteilen, dass der IRQ bearbeitet wurde
     break;
 
   default:
@@ -205,7 +214,7 @@ uint64 handle_interrupts(stackframes **s, uint64 pc)
     printhex(r_mcause());
     break;
   }
-  pc = pc - 4;
+  pc = pc - 4;                                      
   return pc;
 }
 
@@ -220,77 +229,87 @@ void panic(char *errorCode)
 
 //--------------------------------------exception handler------------------------------//
 
-// This is the C code part of the exception handler
-// "exception" is called from the assembler function "ex" in ex.S with registers saved on the stack
+// Dies ist der C-Code-Teil des Exception-Handlers
+// "exception" wird von der Assemblerfunktion "ex" in ex.S mit auf dem Stack gespeicherten Registern aufgerufen
 void exception(stackframes *s)
 {
-  uint64 nr = s->a7;    // read syscall number from stack;
-  uint64 param = s->a0; // read parameter from stack;
+  uint64 nr = s->a7;         // read syscall number from stack;
+  uint64 param = s->a0;      // read parameter from stack;
   uint64 sp;
-  uint64 pc = r_mepc(); // read exception PC;
-  uint64 retval = 0;
+  uint64 pc = r_mepc();      // read exception PC;
+  uint64 retval = 0;         // return value
 
-  if ((r_mcause() & (1ULL << 63)) != 0)
-  { // lieg ein asyncroner Interrupt vor?
+  if ((r_mcause() & (1ULL << 63)) != 0) // lieg ein asyncroner Interrupt vor?
+  { 
     pc = handle_interrupts(&s, pc);
   }
   //-----------------------------Fehler behandlung---------------------//
   else if (r_mcause() != 8)
   {
-    exception_handler();    
-  } 
+    error_handler();
+  }
   else
   {
     switch (nr)
     {
-    case 1:
-      if (pcb[current_process].state == BLOCKED){
+    case 1: // printstring(...)
+      if (pcb[current_process].state == BLOCKED)
+      {
         printstring("waiting...\n");
-        pc = yield(&s,pc);
-      } else{
+        pc = yield(&s, pc);
+      }
+      else
+      {
         printstring((char *)param);
       }
       break;
-    case 2:
-      if (pcb[current_process].state == BLOCKED){
+    case 2: // putachar(...)
+      if (pcb[current_process].state == BLOCKED)
+      {
         printstring("waiting...\n");
-        pc = yield(&s,pc);
-      } else{
+        pc = yield(&s, pc);
+      }
+      else
+      {
         putachar((char)param);
       }
       break;
-    case 3: // readachar
-      if (!holding()){
+    case 3: // readachar()
+      if (!holding())      // wenn der Uart noch offen ist, schließe ihn
+      {
         close_uart();
       }
-	    if (lock.locked == 1 && lock.process == current_process){
-	      retval = readachar();
-        if (retval == 0){
+      if (lock.locked == 1 && lock.process == current_process)
+      {                   // wenn der Uart von dem momentanen Prozess geschlossen wurde lese ein zeichen aus oder warte
+        retval = readachar();
+        if (retval == 0)
+        {
           pcb[current_process].state = BLOCKED;
-          pc = yield(&s,pc);
+          pc = yield(&s, pc);
         }
-	    }else{
+      }
+      else
+      {                   // Falls ein zweiter Prozess auch auf den Uart zugreifen möchte, Blockiere ihn und warte bis der Uart wieder offen ist
         pcb[current_process].state = BLOCKED;
         printstring("waiting...\n");
-        pc = yield(&s,pc);
-	    }
+        pc = yield(&s, pc);
+      }
       break;
-    case 10:
-      ;
+    case 10:; // close_uart()
       int return_Uart = close_uart();
       if (return_Uart == 2)
       {
         printstring("\nError! Uart was already closed by another process\n");
       }
       break;
-    case 11:
+    case 11: // open_uart()
       open_uart();
       break;
-    case 23:
-      // yield system call
+    case 23: // yield(...) system call
       pc = yield(&s, pc);
       break;
-    case 42: // user program returned, starting from the beginning
+    case 42: // sys_exit(...)
+    // user programm beenden und neustarten (Round Robin)
       pc = sys_exit(&s, pc);
       pc = pcb[current_process].pc - 4;
       break;
@@ -303,15 +322,17 @@ void exception(stackframes *s)
     }
   }
 
-  // adjust return value - we want to return to the instruction _after_ the ecall! (at address mepc+4)
-  w_mepc(pc+4);
+  // return value (pc) anpassen - wir wollen zu der Anweisung nach dem ecall zurückkehren! (an Adresse mepc+4)
+  w_mepc(pc + 4);
 
-  // pass the return value back in a0
-  if (r_mcause() == 8){
-     s->a0 = retval;
+  // den Rückgabewert in a0 schreiben
+  if (r_mcause() == 8)
+  {
+    s->a0 = retval;
   }
-  // um stack wiederherzustellen 
-  asm volatile("mv a1, %0" : : "r" (s));
-
-  // this function returns to ex.S
+  // um stack wiederherzustellen
+  asm volatile("mv a1, %0"
+               :
+               : "r"(s));
+  // geht zu ex.S zurück
 }

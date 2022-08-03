@@ -1,8 +1,6 @@
-#define BUFFER_SIZE 6
+#define BUFFER_SIZE 6  // gibt die Größe des Buffers an
 
 char ringbuffer[BUFFER_SIZE];
-
-int head, tail, full_flag;
 
 int rb_write(char c);
 

@@ -34,7 +34,7 @@ int main(void) {
 
    while (1)
    {
-    #if 1
+    #if 0
     char c;
     for(int i=0;i<100000000;i++);
     syscall(10,0);
@@ -44,8 +44,8 @@ int main(void) {
     syscall(11,0);
     //syscall(23,0);
     #endif
-    //syscall(2,'2');
-    //for(int i=0;i<100000000;i++);    
+    syscall(2,'2');
+    for(int i=0;i<100000000;i++);    
    }
    
 
