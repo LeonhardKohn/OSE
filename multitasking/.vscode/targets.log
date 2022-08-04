@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Wed Jul 20 20:30:06 2022
+# Make data base, printed on Thu Aug  4 11:20:26 2022
 
 # Variables
 
@@ -25,7 +25,7 @@ GDM_LANG = de_DE.utf8
 # default
 MAKE_COMMAND := make
 # makefile (from 'Makefile', line 9)
-USERDEPS = riscv.h types.h
+USERDEPS = riscv.h types.h 
 # environment
 QT_ACCESSIBILITY = 1
 # automatic
@@ -35,7 +35,7 @@ VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # default
 .VARIABLES := 
 # environment
-PWD = /home/roku/Dokumente/Uni/OSE/OSE2022/lecture5/multitasking
+PWD = /home/roku/Dokumente/Uni/OSE/GIT/multitasking
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
@@ -67,7 +67,7 @@ MAKEFLAGS = pqrR
 # environment
 LESS_TERMCAP_so = [01;33m
 # makefile
-CURDIR := /home/roku/Dokumente/Uni/OSE/OSE2022/lecture5/multitasking
+CURDIR := /home/roku/Dokumente/Uni/OSE/GIT/multitasking
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
 # automatic
@@ -77,7 +77,7 @@ LESS_TERMCAP_ue = [0m
 # environment
 MFLAGS = -pqrR
 # environment
-SSH_AUTH_SOCK = /tmp/ssh-XXXXXXWzo4E6/agent.903
+SSH_AUTH_SOCK = /tmp/ssh-XXXXXXiEbevE/agent.872
 # default
 .SHELLFLAGS := -c
 # environment
@@ -91,15 +91,15 @@ MAKEFILE_LIST := Makefile
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 1752
+VSCODE_PID = 1678
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
 ?D = $(patsubst %/,%,$(dir $?))
 # makefile (from 'Makefile', line 8)
-KERNELOBJS = boot.o kernel.o ex.o setup.o
+KERNELOBJS = boot.o kernel.o ex.o setup.o ringbuffer.o uart.o uartlock.o
 # environment
-SESSION_MANAGER = local/kali-laptop:@/tmp/.ICE-unix/903,unix/kali-laptop:/tmp/.ICE-unix/903
+SESSION_MANAGER = local/kali-laptop:@/tmp/.ICE-unix/872,unix/kali-laptop:/tmp/.ICE-unix/872
 # automatic
 *F = $(notdir $*)
 # environment
@@ -175,7 +175,7 @@ GTK_MODULES = gail:atk-bridge:appmenu-gtk-module
 # default
 MAKE_VERSION := 4.3
 # environment
-SSH_AGENT_PID = 959
+SSH_AGENT_PID = 929
 # environment
 _ = /usr/share/code/code
 # environment
@@ -231,9 +231,9 @@ GDMSESSION = lightdm-xsession
 
 # Directories
 
-# . (device 2050, inode 18219783): 22 files, no impossibilities.
+# . (device 2050, inode 24117249): 44 files, no impossibilities.
 
-# 22 files, no impossibilities in 1 directories.
+# 44 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -256,7 +256,7 @@ user1:
 
 userprogs1.h: user1.o user2.o userentry.o riscv.h types.h
 #  Implicit rule search has not been done.
-#  File does not exist.
+#  Last modified 2022-08-04 07:38:32.582861742
 #  File has been updated.
 #  Needs to be updated (-q is set).
 # variable set hash-table stats:
@@ -272,7 +272,7 @@ userprogs1.h: user1.o user2.o userentry.o riscv.h types.h
 # Not a target:
 user1.c:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 17:45:45.254595768
+#  Last modified 2022-08-04 11:20:25.887640494
 #  File has been updated.
 #  Successfully updated.
 
@@ -280,7 +280,7 @@ user1.o: user1.c hardware.h riscv.h types.h riscv.h types.h
 #  Implicit rule search has been done.
  
 #  Implicit/static pattern stem: 'user1'
-#  File does not exist.
+#  Last modified 2022-08-04 07:38:32.546861743
 #  File has been updated.
 #  Needs to be updated (-q is set).
 # automatic
@@ -296,7 +296,7 @@ user1.o: user1.c hardware.h riscv.h types.h riscv.h types.h
 # automatic
 # ^ := user1.c hardware.h riscv.h types.h
 # automatic
-# ? := user1.c hardware.h riscv.h types.h
+# ? := user1.c
 # automatic
 # | := 
 # variable set hash-table stats:
@@ -325,7 +325,7 @@ setup.o:
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-04 10:41:34.8468538
+#  Last modified 2022-07-25 13:54:19.746350297
 #  File has been updated.
 #  Successfully updated.
 
@@ -355,9 +355,15 @@ clean:
 	-@rm -f *.o *.bin kernel user1 user2 userprogs1.h userprogs2.h
 
 # Not a target:
+uartlock.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
 riscv.h:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:59:14.889226139
+#  Last modified 2022-08-02 10:59:05.256522174
 #  File has been updated.
 #  Successfully updated.
 
@@ -367,7 +373,19 @@ ex.o:
 #  Modification time never checked.
 #  File has not been updated.
 
-kernel: boot.o kernel.o ex.o setup.o hardware.h riscv.h types.h userprogs1.h userprogs2.h
+# Not a target:
+uart.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+ringbuffer.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+kernel: boot.o kernel.o ex.o setup.o ringbuffer.o uart.o uartlock.o hardware.h riscv.h types.h userprogs1.h userprogs2.h
 #  Implicit rule search has not been done.
 #  Modification time never checked.
 #  File has not been updated.
@@ -379,7 +397,7 @@ kernel: boot.o kernel.o ex.o setup.o hardware.h riscv.h types.h userprogs1.h use
 # Not a target:
 hardware.h:
 #  Implicit rule search has been done.
-#  Last modified 2022-07-18 10:59:36.993225166
+#  Last modified 2022-08-03 12:59:38.218320036
 #  File has been updated.
 #  Successfully updated.
 
@@ -421,24 +439,24 @@ user2.o:
 # Not a target:
 types.h:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-20 10:26:45.328177588
+#  Last modified 2022-06-20 10:26:45.328177
 #  File has been updated.
 #  Successfully updated.
 
 # files hash-table stats:
-# Load=22/1024=2%, Rehash=0, Collisions=1/76=1%
+# Load=25/1024=2%, Rehash=0, Collisions=1/82=1%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 44 / storage = 347 B / avg = 7 B
-# current buf: size = 8162 B / used = 347 B / count = 44 / avg = 7 B
+# strcache buffers: 1 (0) / strings = 54 / storage = 466 B / avg = 8 B
+# current buf: size = 8162 B / used = 466 B / count = 54 / avg = 8 B
 
-# strcache performance: lookups = 97 / hit rate = 54%
+# strcache performance: lookups = 122 / hit rate = 55%
 # hash-table stats:
-# Load=44/8192=1%, Rehash=0, Collisions=0/97=0%
-# Finished Make data base on Wed Jul 20 20:30:06 2022
+# Load=54/8192=1%, Rehash=0, Collisions=0/122=0%
+# Finished Make data base on Thu Aug  4 11:20:26 2022
 
  

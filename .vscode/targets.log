@@ -1,0 +1,317 @@
+make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.82
+# Built for i686-pc-mingw32
+# Copyright (C) 2010  Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+ 
+
+# Make data base, printed on Sun Jul 31 14:47:38 2022
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# environment
+VIRTUALC = C:\Program Files\VirtualC\Virtual-C IDE\
+# default
+.SHELLFLAGS := -c
+# makefile
+MAKEFLAGS = Rrqp
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+PLATFORMIO_IDE = 2.5.1
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+HOMEDRIVE = C:
+# automatic
+@F = $(notdir $@)
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# makefile
+CURDIR := c:/Users/Leo/OneDrive - Otto-Friedrich-Universit�t Bamberg/01Uni/Angewandte Informatik/2. Semester/OSE/GIT
+# default
+SHELL := sh.exe
+# environment
+WINDIR = C:\Windows
+# environment
+VSCODE_NLS_CONFIG = {"locale":"de","availableLanguages":{"*":"de"},"_languagePackId":"ac49ed8871898f6ccc91afa1076d75a0.de","_translationsConfigFile":"C:\\Users\\Leo\\AppData\\Roaming\\Code\\clp\\ac49ed8871898f6ccc91afa1076d75a0.de\\tcf.json","_cacheRoot":"C:\\Users\\Leo\\AppData\\Roaming\\Code\\clp\\ac49ed8871898f6ccc91afa1076d75a0.de","_resolvedLanguagePackCoreLocation":"C:\\Users\\Leo\\AppData\\Roaming\\Code\\clp\\ac49ed8871898f6ccc91afa1076d75a0.de\\3b889b090b5ad5793f524b5d1d39fda662b96a2a","_corruptedFile":"C:\\Users\\Leo\\AppData\\Roaming\\Code\\clp\\ac49ed8871898f6ccc91afa1076d75a0.de\\corrupted.info","_languagePackSupport":true}
+# environment
+VBOX_MSI_INSTALL_PATH = C:\Program Files\Oracle\VirtualBox\
+# environment
+ONEDRIVE = C:\Users\Leo\OneDrive - Otto-Friedrich-Universit�t Bamberg
+# environment
+PATHEXT = .COM;.EXE;.BAT; 
+.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY;.PYW
+# makefile
+MAKEFILE_LIST := 
+# environment
+FPS_BROWSER_USER_PROFILE_STRING = Default
+# environment
+TMP = C:\Users\Leo\AppData\Local\Temp
+# environment
+PROGRAMW6432 = C:\Program Files
+# environment
+PROGRAMDATA = C:\ProgramData
+# environment
+VSCODE_CWD = C:\Users\Leo\AppData\Local\Programs\Microsoft VS Code
+# environment
+NO_PROXY = 127.0.0.1
+# environment
+COMMONPROGRAMW6432 = C:\Program Files\Common Files
+# environment
+CHOCOLATEYLASTPATHUPDATE = 132999544632802464
+# environment
+PROCESSOR_ARCHITECTURE = x86
+# environment
+USERPROFILE = C:\Users\Leo
+# environment
+CHOCOLATEYINSTALL = C:\ProgramData\chocolatey
+# environment
+ALLUSERSPROFILE = C:\ProgramData
+# environment
+NUMBER_OF_PROCESSORS = 12
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine archives
+# automatic
+%F = $(notdir $%)
+# environment
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_17308_VHMVBGYHRFXSIFKR
+# environment
+COMPUTERNAME = LEONHARDS-PC
+# environment
+PROGRAMFILES = C:\Program Files (x86)
+# environment
+DRIVERDATA = C:\Windows\System32\Drivers\DriverData
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+USERNAME = Leo
+# environment
+PUBLIC = C:\Users\Public
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+VSCODE_CODE_CACHE_PATH = C:\Users\Leo\AppData\Roaming\Code\CachedData\3b889b090b5ad5793f524b5d1d39fda662b96a2a
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+# environment
+COMMONPROGRAMFILES = C:\Program Files (x86)\Common Files
+# environment
+LOGONSERVER = \\LEONHARDS-PC
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# environment
+USERDOMAIN = LEONHARDS-PC
+# environment
+MAKELEVEL := 0
+# environment
+PLATFORMIO_PATH = C:\Users\Leo\.platformio\python3;C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Eclipse Adoptium\jdk-17.0.1.12-hotspot\bin;C:\Program Files\Amazon Corretto\jdk15.0.1_9\bin;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\AdoptOpenJDK\jre-8.0.265.01-hotspot\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Gradle\gradle-7.0\bin;C:\cygwin64;C:\Program Files\MiKTeX\miktex\bin\x64\;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Users\Leo\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Users\Leo\AppData\Local\Programs\Microsoft VS Code\bin;C:\SysGCC\avr\bin;C:\SysGCC\beaglebone\bin;C:\MinGW\bin;C:\Users\Leo\AppData\Roaming\npm;C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Eclipse Adoptium\jdk-17.0.1.12-hotspot\bin;C:\Program Files\Amazon Corretto\jdk15.0.1_9\bin;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\AdoptOpenJDK\jre-8.0.265.01-hotspot\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Gradle\gradle-7.0\bin;C:\cygwin64;C:\Program Files\MiKTeX\miktex\bin\x64\;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Users\Leo\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Users\Leo\AppData\Local\Programs\Microsoft VS Code\bin;C:\SysGCC\avr\bin;C:\SysGCC\beaglebone\bin;C:\MinGW\bin;C:\Users\Leo\AppData\Roaming\npm
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+PATH = C:\Python310\Scripts\;C:\Python310\;C:\Program Files\Eclipse Adoptium\jdk-17.0.1.12-hotspot\bin;C:\Program Files\Amazon Corretto\jdk15.0.1_9\bin;C:\Program Files\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files (x86)\AdoptOpenJDK\jre-8.0.265.01-hotspot\bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\PuTTY\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Gradle\gradle-7.0\bin;C:\cygwin64;C:\Program Files\MiKTeX\miktex\bin\x64\;C:\Program Files\nodejs\;C:\ProgramData\chocolatey\bin;;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Users\Leo\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Users\Leo\AppData\Local\Programs\Microsoft VS Code\bin;C:\SysGCC\avr\bin;C:\SysGCC\beaglebone\bin;C:\MinGW\bin;C:\Users\Leo\AppData\Roaming\npm
+# environment
+JAVA_HOME = C:\Program Files\Amazon Corretto\jdk15.0.1_9
+# environment
+ONEDRIVECOMMERCIAL = C:\Users\Leo\OneDrive - Otto-Friedrich-Universit�t Bamberg
+# default
+MAKE_VERSION := 3.82
+# environment
+__PSLOCKDOWNPOLICY = 0
+# environment
+PROGRAMFILES(X86) = C:\Program Files (x86)
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+LOCALAPPDATA = C:\Users\Leo\AppData\Local
+# environment
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\Windows\system32\WindowsPowerShell\v1.0\Modules
+# default
+MAKE_COMMAND := make.exe
+# environment
+PROCESSOR_ARCHITEW6432 = AMD64
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# environment
+PROCESSOR_IDENTIFIER = AMD64 Family 23 Model 8 Stepping 2, AuthenticAMD
+# environment
+OS = Windows_NT
+# environment
+VSCODE_IPC_HOOK = \\.\pipe\a1d05713baf1a46549abc376f54c8ba5-1.69.2-main-sock
+# environment
+HOMEPATH = \Users\Leo
+# environment
+COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
+# environment
+PROMPT = $P$G
+# environment
+MFLAGS = -Rrqp
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+SYSTEMROOT = C:\Windows
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# automatic
++F = $(notdir $+)
+# environment
+APPDATA = C:\Users\Leo\AppData\Roaming
+# environment
+TEMP = C:\Users\Leo\AppData\Local\Temp
+# environment
+COMSPEC = C:\Windows\system32\cmd.exe
+# default
+MAKEFILES := 
+# automatic
+<F = $(notdir $<)
+# environment
+PLATFORMIO_CALLER = vscode
+# environment
+LC_ALL = C
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+SYSTEMDRIVE = C:
+# environment
+SESSIONNAME = Console
+# environment
+PROCESSOR_REVISION = 0802
+# default
+.RECIPEPREFIX := 
+# makefile
+.DEFAULT_GOAL := 
+# environment
+LANG = C
+# environment
+PROCESSOR_LEVEL = 23
+# environment
+FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
+# environment
+VSCODE_PID = 17308
+# environment
+USERDOMAIN_ROAMINGPROFILE = LEONHARDS-PC
+# variable set hash-table stats:
+# Load=96/1024=9%, Rehash=0, Collisions=15/111=14%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# \Program Files (x86)\NVIDIA Corporation\PhysX\Common;C: could not be stat'd.
+# \Users\Leo\AppData\Local\Microsoft\WindowsApps;C: could not be stat'd.
+# \MinGW\bin;C: could not be stat'd.
+# \Python310\;C: could not be stat'd.
+# \Windows\System32\OpenSSH\;C: could not be stat'd.
+# \Python310\Scripts\;C: could not be stat'd.
+# . (key c:/Users/Leo/OneDrive - Otto-Friedrich-Universit�t Bamberg/01Uni/Angewandte Informatik/2. Semester/OSE/GIT, mtime 1659270096): 9 files, no impossibilities.
+# \Windows;C: could not be stat'd.
+# \Users\Leo\AppData\Local\Programs\Microsoft VS Code\bin;C: could not be stat'd.
+# \ProgramData\chocolatey\bin;;C: could not be stat'd.
+# \Program Files\Docker\Docker\resources\bin;C: could not be stat'd.
+# \Users\Leo\AppData\Roaming\npm (key c:/Users/Leo/AppData/Roaming/npm, mtime 1655480748): 2 files, no impossibilities.
+# C: could not be stat'd.
+# \Windows\System32\Wbem;C: could not be stat'd.
+# \Program Files (x86)\AdoptOpenJDK\jre-8.0.265.01-hotspot\bin;C: could not be stat'd.
+# \Program Files\Common Files\Oracle\Java\javapath;C: could not be stat'd.
+# \Program Files\Eclipse Adoptium\jdk-17.0.1.12-hotspot\bin;C: could not be stat'd.
+# \Program Files\nodejs\;C: could not be stat'd.
+# \Program Files\Amazon Corretto\jdk15.0.1_9\bin;C: could not be stat'd.
+# \ProgramData\DockerDesktop\version-bin;C: could not be stat'd.
+# \Program Files\PuTTY\;C: could not be stat'd.
+# \Windows\system32;C: could not be stat'd.
+# \SysGCC\beaglebone\bin;C: could not be stat'd.
+# \SysGCC\avr\bin;C: could not be stat'd.
+# \Gradle\gradle-7.0\bin;C: could not be stat'd.
+# \cygwin64;C: could not be stat'd.
+# \Program Files\Intel\WiFi\bin\;C: could not be stat'd.
+# \Program Files\Common Files\Intel\WirelessCommon\;C: could not be stat'd.
+# \Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C: could not be stat'd.
+# \Windows\System32\WindowsPowerShell\v1.0\;C: could not be stat'd.
+# \Program Files (x86)\Common Files\Oracle\Java\javapath;C: could not be stat'd.
+# \Program Files\MiKTeX\miktex\bin\x64\;C: could not be stat'd.
+
+# 11 files, no impossibilities in 32 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+GNUmakefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
+
+# files hash-table stats:
+# Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
+# VPATH Search Paths
+
+# No `vpath' search paths.
+
+# No general (`VPATH' variable) search path.
+
+# # of strings in strcache: 0 / lookups = 50 / hits = 50
+# # of strcache buffers: 1 (* 8176 B/buffer = 8176 B)
+ 
+make.exe: *** No rule to make target `all'.  Stop.
+
+# strcache used: total = 0 (1213) / max = 0 / min = 8176 / avg = 0
+# strcache free: total = 0 (6963) / max = 0 / min = 8176 / avg = 0
+
+# strcache hash-table stats:
+# Load=46/8192=1%, Rehash=0, Collisions=2/50=4%
+# Finished Make data base on Sun Jul 31 14:47:38 2022
+
+ 

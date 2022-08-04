@@ -2,7 +2,7 @@
 #define MSTATUS_MPP_M (3L << 11)
 #define MSTATUS_MPP_S (1L << 11)
 #define MSTATUS_MPP_U (0L << 11)
-#define MSTATUS_MIE (1L << 3) // machine-mode interrupt enable.
+#define MSTATUS_MIE (1L << 3) // machine-mode interrupt enable. (4 Bit ist gewollt)
 
 #define CLINT 0x2000000L
 #define CLINT_MTIMECMP(hartid) (CLINT + 0x4000 + 8 * (hartid))
