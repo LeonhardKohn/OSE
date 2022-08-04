@@ -1,8 +1,0 @@
-{
-    "makefile.extensionOutputFolder": "./.vscode",
-    "files.associations": {
-        "riscv.h": "c",
-        "uartlock.h": "c",
-        "uart.h": "c"
-    }
-}
