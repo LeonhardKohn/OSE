@@ -1,6 +1,5 @@
 #include "types.h"
 
-// TODO 3.1: add a data structure for the user stack
 __attribute__ ((aligned (16))) char userstack[4096];
 
 uint64 syscall(uint64 nr, uint64 param) {

@@ -14,7 +14,7 @@ extern void printhex(uint64);
 extern PCBs pcb[];
 extern volatile struct uart *uart0;
 
-int interval = 10000000; // intervall für den Timerinterrupt 
+int interval = 10000000; // Intervall für den Timerinterrupt 
 
 /**
  * PLIC (behandelt alles Hardware-interrupts) ---> RISC-V CPU
@@ -79,7 +79,7 @@ void timeInterupt(void)
   // aktiviert den interupt-mode
   w_mstatus(r_mstatus() | MSTATUS_MIE); // ändern das 4 Bit und setzt es auf 1
 
-  // aktiviere maschiene-mode timer interrupt, mie steht für machien interrupt enable
+  // aktiviere maschiene-mode timer interrupt, "mie" steht für machien interrupt enable
   w_mie(r_mie() | MIE_MTIE); // setzt das 7 bit auf 1
 }
 

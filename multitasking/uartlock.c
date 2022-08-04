@@ -6,7 +6,7 @@
 
 extern int current_process;
 extern void panic(char *c);
-uartlock lock;              // erstellt struktur
+uartlock lock;              // erstellt Struktur
 
 void initlock(){
   lock.locked = 0;
@@ -16,11 +16,11 @@ void initlock(){
 // TODO Acquire the lock.
 // Loops (spins) until the lock is acquired.
 void acquire(){
-    //asm("cli");
+    asm("csrci mstatus, 0x8"); // assambly code, mie ist bit 3, 2^3 = 8
 }
 // TODO Release the lock.
 void release(){
-  //asm ("sti");
+  asm("csrsi mstatus, 0x8");
 }
 
 /**
