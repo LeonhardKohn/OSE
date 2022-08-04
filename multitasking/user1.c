@@ -37,6 +37,7 @@ int main(void) {
     syscall(2,'1');
     syscall(2,c);
     syscall(11,0);
+    syscall(23,0);
    }
 
 }
